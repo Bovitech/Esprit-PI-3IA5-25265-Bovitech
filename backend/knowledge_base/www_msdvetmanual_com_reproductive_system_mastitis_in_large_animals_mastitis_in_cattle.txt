@@ -1,0 +1,164 @@
+TITLE: Mastitis in Cattle
+SOURCE: MSD Veterinary Manual
+
+Mastitis in cattle is an inflammation of one or more mammary glands, usually caused by infection when microbes enter through the teat canal.
+
+Main causes
+Most infections are caused by:
+- Streptococci
+- Staphylococci
+- Gram-negative bacteria (especially coliforms like E. coli)
+
+Transmission
+Two main types:
+1. Contagious transmission (during milking)
+   - via hands of milkers
+   - via milking equipment
+   - main pathogens:
+     - Staphylococcus aureus
+     - Streptococcus agalactiae
+     - Corynebacterium bovis
+
+2. Environmental transmission
+   - from bedding, water, mud, manure
+   - from contaminated equipment
+   - from skin lesions or flies
+
+Types of mastitis
+
+1. Subclinical mastitis
+- no visible signs
+- milk appears normal
+- infection detected by high somatic cell count (SCC)
+
+Key points:
+- SCC ≥ 200,000 cells/mL → likely infection
+- higher SCC → lower milk production
+- infections can become chronic and persist long-term
+
+Detection:
+- California Mastitis Test (CMT)
+- laboratory SCC measurement
+
+2. Clinical mastitis
+Visible signs:
+- abnormal milk (clots, discoloration)
+- swollen, hot, painful udder
+- redness
+
+Severity:
+- Mild: only local signs
+- Moderate: udder inflammation
+- Severe:
+  - fever
+  - loss of appetite
+  - shock
+
+Severe mastitis
+- often caused by coliform bacteria
+- may lead to death or culling
+- requires urgent treatment
+
+Signs:
+- watery or abnormal milk
+- systemic illness
+- dehydration
+
+Diagnosis
+- milk culture is the most reliable method
+- helps identify the causative pathogen
+
+Treatment
+
+General principles:
+- identify pathogen if possible
+- use appropriate antimicrobials
+- respect withdrawal periods
+
+Subclinical mastitis:
+- treatment depends on pathogen and duration
+- chronic infections (especially S. aureus) are difficult to cure
+
+Clinical mastitis:
+- intramammary antibiotics commonly used
+- severe cases require:
+  - fluids
+  - electrolytes
+  - anti-inflammatory drugs
+
+Important:
+- early treatment improves outcomes
+- avoid unnecessary antibiotic use
+
+Severe cases management:
+- fluid therapy (very important)
+- anti-inflammatory drugs (NSAIDs)
+- sometimes systemic antibiotics
+
+Dry period treatment
+
+The dry period is a key moment:
+- higher cure rates
+- lower cost
+- no milk withdrawal losses
+
+Dry cow therapy:
+- intramammary antibiotics at end of lactation
+- one tube per quarter
+
+Types:
+- Blanket Dry Cow Therapy (all cows)
+- Selective Dry Cow Therapy (only infected cows)
+
+Teat sealants:
+- create physical barrier
+- reduce new infections
+
+Prevention
+
+Milking hygiene:
+- wash and dry udders before milking
+- use individual towels
+- wear gloves
+- milk infected cows last
+
+Post-milking teat dipping:
+- most important practice
+- use disinfectant dip (not spray)
+
+Environment:
+- clean, dry bedding
+- sand preferred over organic bedding
+- regular cleaning
+
+Management:
+- avoid overmilking
+- maintain milking equipment
+- control flies
+- prevent teat injuries
+
+Monitoring:
+- regular SCC testing
+- track infections and cure rates
+
+Key indicators:
+- new infection rate < 8%
+- cure rate > new infection rate
+- SCC < 200,000 cells/mL
+
+Vaccination
+- limited effectiveness
+- some vaccines reduce severity (e.g., coliform mastitis)
+
+Important notes
+- mastitis reduces milk yield and quality
+- prevention is more effective than treatment
+- chronic cases may require culling
+
+Summary
+- mastitis = infection of udder
+- caused mainly by bacteria
+- can be subclinical or clinical
+- detection via SCC and observation
+- treatment depends on pathogen
+- hygiene is the best prevention

@@ -1,0 +1,176 @@
+{
+  "document_title": "Réforme en élevage bovin laitier",
+  "tag_schema": [
+    "maladie",
+    "reproduction",
+    "metabolique",
+    "locomotion",
+    "nutrition",
+    "economie",
+    "gestion"
+  ],
+  "chunks": [
+    {
+      "id": "c1",
+      "title": "Définition de la réforme",
+      "content": "La réforme correspond à la sortie d’une vache du troupeau lorsqu’elle n’est plus productive ou rentable.",
+      "tags": ["gestion"],
+      "keywords": ["réforme bovine", "sortie troupeau"],
+      "related_chunks": ["c2", "c24"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c2",
+      "title": "Objectif de la réforme",
+      "content": "La réforme permet d’améliorer la productivité du troupeau, le renouvellement génétique et la rentabilité.",
+      "tags": ["gestion", "economie"],
+      "keywords": ["productivité", "rentabilité", "sélection"],
+      "related_chunks": ["c24", "c25"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c4",
+      "title": "Production laitière insuffisante",
+      "content": "Une faible production laitière est la principale cause de réforme. Elle dépend de l’alimentation, du climat, de la génétique et des maladies.",
+      "tags": ["nutrition", "economie"],
+      "keywords": ["production lait", "performance"],
+      "related_chunks": ["c5", "c29"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c5",
+      "title": "Facteurs influençant la production",
+      "content": "La production laitière dépend de la qualité des fourrages, de l’équilibre nutritionnel et du potentiel génétique.",
+      "tags": ["nutrition"],
+      "keywords": ["fourrage", "ration", "génétique"],
+      "related_chunks": ["c4", "c29"],
+      "importance_level": "medium"
+    },
+    {
+      "id": "c10",
+      "title": "Mammites",
+      "content": "Les mammites sont des inflammations de la glande mammaire causées par des bactéries. Elles réduisent la production et la qualité du lait.",
+      "tags": ["maladie"],
+      "keywords": ["mammite", "infection pis", "lait anormal"],
+      "related_chunks": ["c11", "c12"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c11",
+      "title": "Types de mammites",
+      "content": "Les mammites peuvent être cliniques avec symptômes visibles ou subcliniques détectées par tests.",
+      "tags": ["maladie"],
+      "keywords": ["mammites cliniques", "CMT"],
+      "related_chunks": ["c10"],
+      "importance_level": "medium"
+    },
+    {
+      "id": "c13",
+      "title": "Brucellose",
+      "content": "La brucellose est une maladie infectieuse provoquant avortements et pertes de production.",
+      "tags": ["maladie", "reproduction"],
+      "keywords": ["brucella", "avortement"],
+      "related_chunks": ["c15"],
+      "importance_level": "medium"
+    },
+    {
+      "id": "c14",
+      "title": "Tuberculose bovine",
+      "content": "La tuberculose est une zoonose entraînant des pertes économiques et l’élimination des animaux infectés.",
+      "tags": ["maladie", "economie"],
+      "keywords": ["tuberculose", "zoonose"],
+      "related_chunks": ["c24"],
+      "importance_level": "medium"
+    },
+    {
+      "id": "c15",
+      "title": "Infertilité",
+      "content": "L’infertilité est une cause majeure de réforme souvent liée à l’alimentation et à la gestion.",
+      "tags": ["reproduction"],
+      "keywords": ["fertilité", "reproduction"],
+      "related_chunks": ["c16", "c17"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c16",
+      "title": "Anœstrus",
+      "content": "L’anœstrus correspond à l’absence de chaleurs après vêlage, souvent causée par un déficit énergétique.",
+      "tags": ["reproduction", "nutrition"],
+      "keywords": ["absence chaleurs"],
+      "related_chunks": ["c15"],
+      "importance_level": "medium"
+    },
+    {
+      "id": "c18",
+      "title": "Boiteries",
+      "content": "Les boiteries sont des troubles locomoteurs réduisant la production et le bien-être animal.",
+      "tags": ["locomotion", "maladie"],
+      "keywords": ["boiterie", "pieds"],
+      "related_chunks": ["c19"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c20",
+      "title": "Acidose ruminale",
+      "content": "L’acidose est causée par un déséquilibre alimentaire entraînant une baisse du pH du rumen.",
+      "tags": ["metabolique", "nutrition"],
+      "keywords": ["acidose", "pH rumen"],
+      "related_chunks": ["c21"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c21",
+      "title": "Acétonémie",
+      "content": "L’acétonémie est liée à un déficit énergétique et affecte la production et la reproduction.",
+      "tags": ["metabolique", "reproduction"],
+      "keywords": ["cétose", "énergie"],
+      "related_chunks": ["c20"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c23",
+      "title": "Fièvre de lait",
+      "content": "La fièvre de lait est une hypocalcémie provoquant des troubles musculaires et pouvant entraîner la mort.",
+      "tags": ["metabolique"],
+      "keywords": ["hypocalcémie"],
+      "related_chunks": ["c21"],
+      "importance_level": "medium"
+    },
+    {
+      "id": "c24",
+      "title": "Impact économique",
+      "content": "La réforme influence les coûts de production, le renouvellement et la rentabilité de l’élevage.",
+      "tags": ["economie"],
+      "keywords": ["coût", "rentabilité"],
+      "related_chunks": ["c25"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c25",
+      "title": "Coût de renouvellement",
+      "content": "Le coût de renouvellement dépend du remplacement des vaches par des génisses.",
+      "tags": ["economie", "gestion"],
+      "keywords": ["génisses", "remplacement"],
+      "related_chunks": ["c24"],
+      "importance_level": "high"
+    },
+    {
+      "id": "c26",
+      "title": "Finition des vaches",
+      "content": "La finition permet d’engraisser les vaches avant abattage pour améliorer leur valeur.",
+      "tags": ["economie", "gestion"],
+      "keywords": ["engraissement"],
+      "related_chunks": ["c27"],
+      "importance_level": "medium"
+    },
+    {
+      "id": "c29",
+      "title": "Alimentation",
+      "content": "Une alimentation équilibrée en énergie et protéines est essentielle pour la production et la santé.",
+      "tags": ["nutrition"],
+      "keywords": ["ration", "fourrage"],
+      "related_chunks": ["c4", "c5"],
+      "importance_level": "high"
+    }
+  ]
+}

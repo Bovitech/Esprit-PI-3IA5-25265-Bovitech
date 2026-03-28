@@ -1,0 +1,139 @@
+TITLE: Mastitis in Cattle - Synthèse pour chatbot
+
+Definition
+Mastitis is an inflammation of the mammary gland, usually caused by infection when bacteria enter through the teat canal.
+
+Types of mastitis
+
+1. Subclinical mastitis
+- No visible signs
+- Milk appears normal
+- Detected using somatic cell count (SCC)
+- SCC ≥ 200,000 cells/mL indicates infection
+- Causes reduced milk production
+
+2. Clinical mastitis
+- Visible abnormal milk (clots, color change)
+- Swollen, hot, painful udder
+- May include fever and loss of appetite
+
+Severity:
+- Mild: only milk changes
+- Moderate: udder inflammation
+- Severe: systemic signs (shock, fever)
+
+Main causes
+- Bacteria are the primary cause:
+  - Staphylococcus aureus
+  - Streptococcus agalactiae
+  - Streptococcus spp
+  - Coliforms (E. coli, Klebsiella)
+
+Transmission
+
+1. Contagious (during milking)
+- Milkers’ hands
+- Milking machines
+- Infected cows
+
+2. Environmental
+- Dirty bedding
+- Mud, manure, water
+- Flies
+- Poor hygiene
+
+Risk factors
+- Dirty or injured teats
+- Poor milking hygiene
+- Wet or contaminated environment
+- Early lactation or after calving
+- Weak immune system
+
+Signs to detect mastitis
+
+Check the cow:
+- Fever
+- Low appetite
+
+Check the udder:
+- Swelling
+- Heat
+- Pain
+- Redness
+
+Check the milk:
+- Clots
+- Watery appearance
+- Color change
+
+Diagnosis
+- Strip test (before milking)
+- California Mastitis Test (CMT)
+- Somatic Cell Count (SCC)
+- Milk culture (most accurate)
+
+Treatment
+
+General rules:
+- Treat early
+- Consult veterinarian
+- Identify pathogen if possible
+
+Methods:
+- Intramammary antibiotics
+- Systemic antibiotics (severe cases)
+- Anti-inflammatory drugs
+- Fluid therapy (for severe mastitis)
+
+Important:
+- Respect withdrawal periods (milk/meat)
+- Discard milk during treatment
+
+Dry cow treatment
+- Best time to treat subclinical mastitis
+- Higher cure rates
+- Prevents new infections
+
+Methods:
+- Antibiotic infusion at drying-off
+- Teat sealants
+
+Prevention
+
+Milking hygiene:
+- Wash and dry udders
+- Use clean towels (one per cow)
+- Wash hands or wear gloves
+- Milk healthy cows first, infected last
+
+Teat dipping:
+- Essential after each milking
+- Use disinfectant (iodine, chlorhexidine)
+
+Environment:
+- Clean and dry bedding
+- Good ventilation
+- Control flies
+
+Management:
+- Maintain milking equipment
+- Avoid teat injuries
+- Monitor cows regularly
+
+Monitoring
+- Regular SCC testing
+- Keep records of infections and treatments
+
+Culling
+- Remove cows with chronic or repeated mastitis
+
+Economic impact
+- Reduced milk production
+- Poor milk quality
+- Veterinary costs
+- Milk rejection due to antibiotics
+
+Key takeaway
+- Mastitis is one of the most important diseases in dairy farming
+- Early detection and hygiene are critical
+- Prevention is more effective than treatment
