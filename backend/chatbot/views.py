@@ -1,10 +1,10 @@
 import json
 import os
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-
+import time
 
 from groq import Groq
 from qdrant_client import QdrantClient
@@ -179,11 +179,12 @@ def search_qdrant(query, top_k=3):
 # -----------------------------
 # 🤖 LLM
 # -----------------------------
-def ask_llm(question, context, history):
+def ask_llm(question, context, history, session_id):
 
 
     if not settings.GROQ_API_KEY:
-        return "Erreur : clé API Groq manquante."
+        yield "Erreur : clé API Groq manquante."
+        return
 
 
     system_prompt = f"""
@@ -225,78 +226,34 @@ CONTEXTE :
 
 
     messages = [{"role": "system", "content": system_prompt}]
-
-
-    # 🔥 ajouter historique
     messages.extend(history)
-
-
-    # ajouter question actuelle
     messages.append({"role": "user", "content": question})
 
-
     try:
-        response = client.chat.completions.create(
+        stream = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=messages,
             temperature=0.3,
-            max_completion_tokens=150
+            max_completion_tokens=150,
+            stream=True  # 🔥 ICI
         )
 
+        full_response = ""
 
-        return response.choices[0].message.content
+        for chunk in stream:
+            if chunk.choices[0].delta.content:
+                token = chunk.choices[0].delta.content
+                full_response += token
+                yield token  # 🔥 envoi direct
 
+        # 🧠 sauvegarder après streaming
+        history.append({"role": "user", "content": question})
+        history.append({"role": "assistant", "content": full_response})
+
+        CONVERSATIONS[ session_id ] = history[-MAX_HISTORY:]
 
     except Exception as e:
-        return f"Erreur LLM: {str(e)}"
-
-
-
-
-# -----------------------------
-# 🧠 GENERATE RESPONSE
-# -----------------------------
-def generate_response(message, session_id="default"):
-
-
-    message_lower = message.lower().strip()
-
-
-    if len(message_lower) < 2:
-        return "Pouvez-vous préciser votre question concernant les vaches ?"
-
-
-    # récupérer historique
-    if session_id not in CONVERSATIONS:
-        CONVERSATIONS[session_id] = []
-
-
-    history = CONVERSATIONS[session_id]
-
-
-    # 🔍 recherche RAG
-    results = search_qdrant(message)
-
-
-    if not results:
-        context = ""
-    else:
-        context = "\n\n".join(results)
-
-    reply = ask_llm(message, context, history)
-
-    # 🧠 sauvegarder conversation
-    history.append({"role": "user", "content": message})
-    history.append({"role": "assistant", "content": reply})
-
-
-    # limiter mémoire
-    CONVERSATIONS[session_id] = history[-MAX_HISTORY:]
-
-
-    return reply
-
-
+        yield f"\nErreur LLM: {str(e)}"
 
 
 # -----------------------------
@@ -307,20 +264,24 @@ def generate_response(message, session_id="default"):
 def chat(request):
     try:
         body = json.loads(request.body.decode("utf-8"))
-    except:
+    except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-
     message = body.get("message")
-    session_id = body.get("session_id", "default")  # 🔥 important
-
+    session_id = body.get("session_id", "default")
 
     if not isinstance(message, str):
         return JsonResponse({"error": "Invalid message"}, status=400)
 
+    if session_id not in CONVERSATIONS:
+        CONVERSATIONS[session_id] = []
 
-    reply = generate_response(message, session_id)
+    history = CONVERSATIONS[session_id]
 
+    results = search_qdrant(message)
+    context = "\n\n".join(results) if results else ""
 
-    return JsonResponse({"response": reply})
-
+    return StreamingHttpResponse(
+    ask_llm(message, context, history, session_id),
+    content_type="text/plain"
+)

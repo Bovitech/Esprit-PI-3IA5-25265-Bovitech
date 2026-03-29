@@ -1,6 +1,8 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 # Virtual env
 .venv/
@@ -12,8 +14,19 @@ db.sqlite3
 # secrets
 .env
 
-# VSCode
+# VSCode / IDE
 .vscode/
+.idea/
 
 # OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Qdrant
+backend/qdrant_data/
+
+# RAG
+backend/knowledge_base/rag_chunks.json

@@ -1,196 +1,279 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chatbot</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .app {
-      width: 100%;
-      max-width: 480px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: min(640px, calc(100vh - 2rem));
-    }
-    h1 {
-      margin: 0;
-      padding: 1rem 1.25rem;
-      font-size: 1.125rem;
-      font-weight: 600;
-      border-bottom: 1px solid #e8eaed;
-      background: #fafbfc;
-    }
-    #chatbox {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .msg {
-      max-width: 85%;
-      padding: 0.65rem 0.9rem;
-      border-radius: 12px;
-      line-height: 1.45;
-      font-size: 0.9375rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .msg.user {
-      align-self: flex-end;
-      background: #2563eb;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-    .msg.bot {
-      align-self: flex-start;
-      background: #e8eaed;
-      color: #1a1a1a;
-      border-bottom-left-radius: 4px;
-    }
-    .msg.error {
-      align-self: flex-start;
-      background: #fee2e2;
-      color: #991b1b;
-      border-bottom-left-radius: 4px;
-    }
-    .composer {
-      display: flex;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem 1rem;
-      border-top: 1px solid #e8eaed;
-      background: #fafbfc;
-    }
-    #message-input {
-      flex: 1;
-      padding: 0.65rem 0.85rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 1rem;
-      outline: none;
-    }
-    #message-input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-    }
-    #send-btn {
-      padding: 0.65rem 1.1rem;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: #fff;
-      background: #2563eb;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    #send-btn:hover:not(:disabled) {
-      background: #1d4ed8;
-    }
-    #send-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chatbot Vocal</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app {
+  width: 420px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+h1 {
+  margin: 0;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+#chatbox {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.msg {
+  padding: 10px 12px;
+  border-radius: 12px;
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+}
+
+.user {
+  background: #2563eb;
+  color: white;
+  align-self: flex-end;
+}
+
+.bot {
+  background: #e5e7eb;
+  align-self: flex-start;
+}
+
+.text {
+  margin-bottom: 6px;
+}
+
+/* 🎧 controls propres */
+.controls {
+  display: flex;
+  gap: 6px;
+  align-self: flex-end;
+}
+
+.controls button {
+  background: #d1d5db;
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 4px 6px;
+}
+
+.controls button:hover {
+  background: #9ca3af;
+}
+
+.composer {
+  display: flex;
+  padding: 10px;
+  gap: 5px;
+}
+
+input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#send-btn {
+  background: #2563eb;
+  color: white;
+  padding: 8px 12px;
+}
+
+#mic-btn {
+  background: #2563eb;
+  color: white;
+  padding: 8px;
+}
+</style>
 </head>
+
 <body>
-  <div class="app">
-    <h1>Chat</h1>
-    <div id="chatbox" aria-live="polite"></div>
-    <div class="composer">
-      <input
-        type="text"
-        id="message-input"
-        placeholder="Type a message…"
-        autocomplete="off"
-        aria-label="Message"
-      />
-      <button type="button" id="send-btn">Send</button>
-    </div>
+
+<div class="app">
+  <h1>🐄 Chatbot Vocal</h1>
+  <div id="chatbox"></div>
+
+  <div class="composer">
+    <button id="mic-btn">🎤</button>
+    <input id="message-input" placeholder="Parlez ou écrivez..." />
+    <button id="send-btn">Send</button>
   </div>
+</div>
 
-  <script>
-    const API_URL = "http://127.0.0.1:8000/chatbot/";
-    const chatbox = document.getElementById("chatbox");
-    const input = document.getElementById("message-input");
-    const sendBtn = document.getElementById("send-btn");
+<script>
+const API_URL = "http://127.0.0.1:8000/chatbot/";
 
-    function appendMessage(text, role) {
-      const el = document.createElement("div");
-      el.className = "msg " + role;
-      el.textContent = text;
-      chatbox.appendChild(el);
+const chatbox = document.getElementById("chatbox");
+const input = document.getElementById("message-input");
+const sendBtn = document.getElementById("send-btn");
+const micBtn = document.getElementById("mic-btn");
+
+// session
+let sessionId = localStorage.getItem("session_id");
+if (!sessionId) {
+  sessionId = crypto.randomUUID();
+  localStorage.setItem("session_id", sessionId);
+}
+
+// ajouter message simple
+function addMsg(text, role) {
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  div.textContent = text;
+  chatbox.appendChild(div);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+// 🔊 TTS
+function speak(text) {
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = "fr-FR";
+  speechSynthesis.speak(utter);
+}
+
+// envoyer message
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = "";
+  addMsg(text, "user");
+  sendBtn.disabled = true;
+
+  const botMsg = document.createElement("div");
+  botMsg.className = "msg bot";
+
+  const textSpan = document.createElement("div");
+  textSpan.className = "text";
+  botMsg.appendChild(textSpan);
+
+  // 🎧 controls
+  const controls = document.createElement("div");
+  controls.className = "controls";
+
+  const playBtn = document.createElement("button");
+  playBtn.textContent = "🔊";
+
+  const pauseBtn = document.createElement("button");
+  pauseBtn.textContent = "⏸";
+
+  const resumeBtn = document.createElement("button");
+  resumeBtn.textContent = "▶️";
+
+  const stopBtn = document.createElement("button");
+  stopBtn.textContent = "⏹";
+
+  controls.appendChild(playBtn);
+  controls.appendChild(pauseBtn);
+  controls.appendChild(resumeBtn);
+  controls.appendChild(stopBtn);
+
+  botMsg.appendChild(controls);
+  chatbox.appendChild(botMsg);
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        session_id: sessionId
+      })
+    });
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    let done = false;
+
+    while (!done) {
+      const { value, done: doneReading } = await reader.read();
+      done = doneReading;
+
+      const chunk = decoder.decode(value || new Uint8Array());
+
+      for (let char of chunk) {
+        textSpan.textContent += char;
+        await new Promise(r => setTimeout(r, 5));
+      }
+
       chatbox.scrollTop = chatbox.scrollHeight;
     }
 
-    async function sendMessage() {
-      const text = input.value.trim();
-      if (!text) return;
+    // 🎧 audio controls
+    playBtn.onclick = () => speak(textSpan.textContent);
+    pauseBtn.onclick = () => speechSynthesis.pause();
+    resumeBtn.onclick = () => speechSynthesis.resume();
+    stopBtn.onclick = () => speechSynthesis.cancel();
 
-      input.value = "";
-      appendMessage(text, "user");
-      sendBtn.disabled = true;
+  } catch (e) {
+    addMsg("❌ Erreur", "bot");
+  }
 
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text }),
-        });
+  sendBtn.disabled = false;
+}
 
-        let data;
-        try {
-          data = await res.json();
-        } catch {
-          appendMessage("Could not read server response.", "error");
-          return;
-        }
+// 🎤 STT
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        if (!res.ok) {
-          appendMessage(
-            data.detail || data.error || "Request failed (" + res.status + ").",
-            "error"
-          );
-          return;
-        }
+if (SpeechRecognition) {
+  const recognition = new SpeechRecognition();
+  recognition.lang = "fr-FR";
 
-        if (typeof data.response === "string") {
-          appendMessage(data.response, "bot");
-        } else {
-          appendMessage("Unexpected response from server.", "error");
-        }
-      } catch (err) {
-        appendMessage(
-          "Network error. Is the server running and CORS enabled?",
-          "error"
-        );
-      } finally {
-        sendBtn.disabled = false;
-        input.focus();
-      }
-    }
+  micBtn.onclick = () => {
+    recognition.start();
+    micBtn.textContent = "🎙️...";
+  };
 
-    sendBtn.addEventListener("click", sendMessage);
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
-  </script>
+  recognition.onresult = (e) => {
+    input.value = e.results[0][0].transcript;
+    micBtn.textContent = "🎤";
+  };
+
+  recognition.onerror = () => {
+    micBtn.textContent = "🎤";
+  };
+
+} else {
+  micBtn.textContent = "❌";
+}
+
+// events
+sendBtn.onclick = sendMessage;
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") sendMessage();
+});
+</script>
+
 </body>
 </html>
