@@ -1,15 +1,15 @@
 import json
 import os
-from django.http import JsonResponse, StreamingHttpResponse
-from django.conf import settings
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 import time
 import whisper
 import subprocess
 import threading
 import queue
 import tempfile
+from django.http import JsonResponse, StreamingHttpResponse, FileResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 from groq import Groq
 from qdrant_client import QdrantClient
@@ -33,6 +33,14 @@ embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 COLLECTION_NAME = "bovin_chunks"
 
 whisper_model = whisper.load_model("base")
+
+
+# -----------------------------
+# CHEMIN VERS PIPER + MODEL TTS
+# -----------------------------
+PIPER_PATH = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\piper.exe"
+MODEL_PATH = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\fr_FR-upmc-medium.onnx"
+
 
 # -----------------------------
 # 🧠 Mémoire conversations
@@ -342,3 +350,48 @@ def stt(request):
     except Exception as e:
         print("ERROR:", e)
         return JsonResponse({"error": str(e)}, status=500)
+    
+
+# -----------------------------
+# TTS
+# -----------------------------
+def generate_tts(text):
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+    output_path = tmp_file.name
+
+    process = subprocess.Popen(
+        [PIPER_PATH, "--model", MODEL_PATH, "--output_file", output_path],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+    process.communicate(input=text.encode("utf-8"))
+
+    return output_path
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def tts(request):
+    body = json.loads(request.body.decode("utf-8"))
+    text = body.get("text", "")
+
+    if not text:
+        return JsonResponse({"error": "No text"}, status=400)
+
+    audio_path = generate_tts(text)
+
+    response = FileResponse(open(audio_path, "rb"), content_type="audio/wav")
+    response["Content-Disposition"] = "inline; filename=tts.wav"
+
+    def cleanup(file_path):
+        try:
+            os.remove(file_path)
+        except:
+            pass
+
+    threading.Thread(target=cleanup, args=(audio_path,)).start()
+
+    return response
+
