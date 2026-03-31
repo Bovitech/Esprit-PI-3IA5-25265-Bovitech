@@ -5,6 +5,11 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import time
+import whisper
+import subprocess
+import threading
+import queue
+import tempfile
 
 from groq import Groq
 from qdrant_client import QdrantClient
@@ -25,9 +30,9 @@ qdrant = QdrantClient(path="qdrant_data")
 # Embedding model
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
-
 COLLECTION_NAME = "bovin_chunks"
 
+whisper_model = whisper.load_model("base")
 
 # -----------------------------
 # 🧠 Mémoire conversations
@@ -285,3 +290,55 @@ def chat(request):
     ask_llm(message, context, history, session_id),
     content_type="text/plain"
 )
+
+
+# -----------------------------
+# STT
+# -----------------------------
+@csrf_exempt
+@require_http_methods(["POST"])
+def stt(request):
+    try:
+        audio_file = request.FILES.get("audio")
+        if not audio_file:
+            return JsonResponse({"error": "No audio file"}, status=400)
+
+        # ✅ chemin compatible Windows/Linux/Mac
+        tmp_dir = tempfile.gettempdir()
+        input_path = os.path.join(tmp_dir, "input.webm")
+        output_path = os.path.join(tmp_dir, "output.wav")
+
+        with open(input_path, "wb") as f:
+            for chunk in audio_file.chunks():
+                f.write(chunk)
+
+        subprocess.run([
+            "ffmpeg", "-y", "-i", input_path,
+            "-ar", "16000", "-ac", "1", output_path
+        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        print("FILE SIZE:", os.path.getsize(output_path))
+
+        result_queue = queue.Queue()
+
+        def transcribe():
+            try:
+                result = whisper_model.transcribe(output_path)
+                result_queue.put(result["text"])
+            except Exception as e:
+                result_queue.put("")
+
+        t = threading.Thread(target=transcribe)
+        t.start()
+        t.join(timeout=30)
+
+        if not result_queue.empty():
+            text = result_queue.get()
+            print("TRANSCRIPTION:", text)
+            return JsonResponse({"text": text})
+        else:
+            return JsonResponse({"error": "Timeout"}, status=504)
+
+    except Exception as e:
+        print("ERROR:", e)
+        return JsonResponse({"error": str(e)}, status=500)

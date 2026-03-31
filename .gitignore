@@ -29,4 +29,5 @@ Thumbs.db
 backend/qdrant_data/
 
 # RAG
-backend/knowledge_base/rag_chunks.json
+backend/knowledge_base/rag_chunks.json*.webm
+*.wav

@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Chatbot Vocal</title>
-
 <style>
 body {
   margin: 0;
@@ -15,7 +14,6 @@ body {
   align-items: center;
   height: 100vh;
 }
-
 .app {
   width: 420px;
   background: white;
@@ -25,13 +23,7 @@ body {
   height: 600px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
-
-h1 {
-  margin: 0;
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-}
-
+h1 { margin: 0; padding: 12px; border-bottom: 1px solid #eee; }
 #chatbox {
   flex: 1;
   overflow-y: auto;
@@ -40,240 +32,153 @@ h1 {
   flex-direction: column;
   gap: 10px;
 }
-
-.msg {
-  padding: 10px 12px;
-  border-radius: 12px;
-  max-width: 80%;
-  display: flex;
-  flex-direction: column;
-}
-
-.user {
-  background: #2563eb;
-  color: white;
-  align-self: flex-end;
-}
-
-.bot {
-  background: #e5e7eb;
-  align-self: flex-start;
-}
-
-.text {
-  margin-bottom: 6px;
-}
-
-/* 🎧 controls propres */
-.controls {
-  display: flex;
-  gap: 6px;
-  align-self: flex-end;
-}
-
-.controls button {
-  background: #d1d5db;
-  border-radius: 6px;
-  font-size: 12px;
-  padding: 4px 6px;
-}
-
-.controls button:hover {
-  background: #9ca3af;
-}
-
-.composer {
-  display: flex;
-  padding: 10px;
-  gap: 5px;
-}
-
-input {
-  flex: 1;
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-}
-
-button {
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-#send-btn {
-  background: #2563eb;
-  color: white;
-  padding: 8px 12px;
-}
-
-#mic-btn {
-  background: #2563eb;
-  color: white;
-  padding: 8px;
-}
+.msg { padding: 10px 12px; border-radius: 12px; max-width: 80%; white-space: pre-wrap; }
+.user { background: #2563eb; color: white; align-self: flex-end; }
+.bot { background: #e5e7eb; align-self: flex-start; }
+.composer { display: flex; padding: 10px; gap: 5px; }
+input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+button { border: none; border-radius: 8px; cursor: pointer; }
+#send-btn, #mic-btn { background: #2563eb; color: white; padding: 8px 12px; }
 </style>
 </head>
-
 <body>
 
 <div class="app">
   <h1>🐄 Chatbot Vocal</h1>
   <div id="chatbox"></div>
-
   <div class="composer">
-    <button id="mic-btn">🎤</button>
+    <button id="mic-btn" type="button">🎤</button>
     <input id="message-input" placeholder="Parlez ou écrivez..." />
-    <button id="send-btn">Send</button>
+    <button id="send-btn" type="button">Send</button>
   </div>
 </div>
 
 <script>
 const API_URL = "http://127.0.0.1:8000/chatbot/";
-
 const chatbox = document.getElementById("chatbox");
 const input = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
 const micBtn = document.getElementById("mic-btn");
 
-// session
-let sessionId = localStorage.getItem("session_id");
-if (!sessionId) {
-  sessionId = crypto.randomUUID();
-  localStorage.setItem("session_id", sessionId);
-}
+let sessionId = localStorage.getItem("session_id") || crypto.randomUUID();
+localStorage.setItem("session_id", sessionId);
 
-// ajouter message simple
+// ✅ addMsg retourne le div pour pouvoir écrire dedans en streaming
 function addMsg(text, role) {
   const div = document.createElement("div");
   div.className = "msg " + role;
   div.textContent = text;
   chatbox.appendChild(div);
   chatbox.scrollTop = chatbox.scrollHeight;
+  return div;  // 🔑 important
 }
 
-// 🔊 TTS
-function speak(text) {
-  speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "fr-FR";
-  speechSynthesis.speak(utter);
-}
-
-// envoyer message
-async function sendMessage() {
-  const text = input.value.trim();
+// ✅ sendMessage lit le STREAM correctement
+// ✅ sendMessage lit le STREAM (pour le chat texte)
+async function sendMessage(customText = null) {
+  const text = customText || input.value.trim();
   if (!text) return;
+  if (!customText) input.value = "";
 
-  input.value = "";
   addMsg(text, "user");
-  sendBtn.disabled = true;
-
-  const botMsg = document.createElement("div");
-  botMsg.className = "msg bot";
-
-  const textSpan = document.createElement("div");
-  textSpan.className = "text";
-  botMsg.appendChild(textSpan);
-
-  // 🎧 controls
-  const controls = document.createElement("div");
-  controls.className = "controls";
-
-  const playBtn = document.createElement("button");
-  playBtn.textContent = "🔊";
-
-  const pauseBtn = document.createElement("button");
-  pauseBtn.textContent = "⏸";
-
-  const resumeBtn = document.createElement("button");
-  resumeBtn.textContent = "▶️";
-
-  const stopBtn = document.createElement("button");
-  stopBtn.textContent = "⏹";
-
-  controls.appendChild(playBtn);
-  controls.appendChild(pauseBtn);
-  controls.appendChild(resumeBtn);
-  controls.appendChild(stopBtn);
-
-  botMsg.appendChild(controls);
-  chatbox.appendChild(botMsg);
+  const botDiv = addMsg("", "bot");
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: text,
-        session_id: sessionId
-      })
+      body: JSON.stringify({ message: text, session_id: sessionId })
     });
+
+    if (!res.ok) {
+      botDiv.textContent = "Erreur serveur " + res.status;
+      return;
+    }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
 
-    let done = false;
-
-    while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-
-      const chunk = decoder.decode(value || new Uint8Array());
-
-      for (let char of chunk) {
-        textSpan.textContent += char;
-        await new Promise(r => setTimeout(r, 5));
-      }
-
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      botDiv.textContent += decoder.decode(value, { stream: true });
       chatbox.scrollTop = chatbox.scrollHeight;
     }
 
-    // 🎧 audio controls
-    playBtn.onclick = () => speak(textSpan.textContent);
-    pauseBtn.onclick = () => speechSynthesis.pause();
-    resumeBtn.onclick = () => speechSynthesis.resume();
-    stopBtn.onclick = () => speechSynthesis.cancel();
-
-  } catch (e) {
-    addMsg("❌ Erreur", "bot");
+  } catch (err) {
+    console.error(err);
+    botDiv.textContent = "Erreur réseau";
   }
-
-  sendBtn.disabled = false;
 }
 
-// 🎤 STT
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-if (SpeechRecognition) {
-  const recognition = new SpeechRecognition();
-  recognition.lang = "fr-FR";
-
-  micBtn.onclick = () => {
-    recognition.start();
-    micBtn.textContent = "🎙️...";
-  };
-
-  recognition.onresult = (e) => {
-    input.value = e.results[0][0].transcript;
-    micBtn.textContent = "🎤";
-  };
-
-  recognition.onerror = () => {
-    micBtn.textContent = "🎤";
-  };
-
-} else {
-  micBtn.textContent = "❌";
-}
-
-// events
-sendBtn.onclick = sendMessage;
-
+sendBtn.onclick = () => sendMessage();
 input.addEventListener("keydown", e => {
   if (e.key === "Enter") sendMessage();
 });
-</script>
 
+
+
+// ---------- MICRO ----------
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+
+micBtn.onclick = async () => {
+  if (!isRecording) {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+    });
+
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+  stream.getTracks().forEach(t => t.stop());
+
+  const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "audio.webm");
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/chatbot/stt/", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();  // STT = JSON normal
+    console.log("STT reçu:", data.text);
+
+    if (data.text && data.text.trim() !== "") {
+      input.value = data.text;  
+      input.focus();          
+    } else {
+      alert("Aucune transcription");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur STT");
+  }
+};
+
+
+    mediaRecorder.start(1000);
+    isRecording = true;
+    micBtn.textContent = "⏹";
+
+  } else {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      mediaRecorder.stop();
+    }
+    isRecording = false;
+    micBtn.textContent = "🎤";
+  }
+};
+</script>
 </body>
 </html>
