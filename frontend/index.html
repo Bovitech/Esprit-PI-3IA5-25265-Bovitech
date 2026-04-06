@@ -295,9 +295,24 @@
   <div class="header">
     <div class="header-icon">🐄</div>
     <div class="header-text">
-      <h1>BovItech</h1>
-      <p>Assistant spécialisé en élevage bovin</p>
+      <h1 id="app-title">BovItech</h1>
+      <p id="app-subtitle">Assistant spécialisé en élevage bovin</p>
     </div>
+
+    <!-- 🔥 AJOUT ICI -->
+    <select id="lang-select" style="
+      margin-left: auto;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+    ">
+      <option value="fr">Français</option>
+      <option value="ar">العربية</option>
+    </select>
+
     <div class="status-dot"></div>
   </div>
 
@@ -321,6 +336,34 @@ const chatbox = document.getElementById("chatbox");
 const input = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
 const micBtn = document.getElementById("mic-btn");
+// 🔥 LANGUE
+let currentLang = localStorage.getItem("lang") || "fr";
+
+const langSelect = document.getElementById("lang-select");
+
+//init
+langSelect.value = currentLang;
+
+//appliquer direction au chargement
+document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
+
+// placeholder dynamique
+input.placeholder = currentLang === "ar"
+  ? "اكتب سؤالك..."
+  : "Posez votre question…";
+
+//changement langue
+langSelect.onchange = () => {
+  currentLang = langSelect.value;
+  localStorage.setItem("lang", currentLang);
+
+  document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
+
+  input.placeholder = currentLang === "ar"
+    ? "اكتب سؤالك..."
+    : "Posez votre question…";
+  updateLanguageUI(); // 🔥 AJOUT ICI
+};
 
 let sessionId = localStorage.getItem("session_id") || crypto.randomUUID();
 localStorage.setItem("session_id", sessionId);
@@ -328,6 +371,17 @@ localStorage.setItem("session_id", sessionId);
 let currentAudio = null;
 let currentPlayBtn = null;
 let currentStopBtn = null;
+
+function updateLanguageUI() {
+  if (currentLang === "ar") {
+    document.getElementById("app-title").textContent = "بوفيتاك";
+    document.getElementById("app-subtitle").textContent = "مساعد متخصص في تربية الأبقار";
+  } else {
+    document.getElementById("app-title").textContent = "BovItech";
+    document.getElementById("app-subtitle").textContent = "Assistant spécialisé en élevage bovin";
+  }
+}
+updateLanguageUI();
 
 function addMsg(text, role) {
   const row = document.createElement("div");
@@ -396,7 +450,7 @@ async function sendMessage(customText = null) {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, session_id: sessionId })
+      body: JSON.stringify({ message: text, session_id: sessionId, lang: currentLang })
     });
 
     if (!res.ok) {
@@ -452,7 +506,10 @@ async function playTTS(text, playBtn, stopBtn) {
     const res = await fetch("http://127.0.0.1:8000/chatbot/tts/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({
+        text,
+        lang: currentLang  
+      })
     });
 
     const blob = await res.blob();

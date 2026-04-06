@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import re  
 import whisper
 import subprocess
 import threading
@@ -28,7 +29,7 @@ qdrant = QdrantClient(path="qdrant_data")
 
 
 # Embedding model
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
 COLLECTION_NAME = "bovin_chunks"
 
@@ -39,8 +40,8 @@ whisper_model = whisper.load_model("base")
 # CHEMIN VERS PIPER + MODEL TTS
 # -----------------------------
 PIPER_PATH = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\piper.exe"
-MODEL_PATH = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\fr_FR-upmc-medium.onnx"
-
+MODEL_FR = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\fr_FR-upmc-medium.onnx"
+MODEL_AR = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\ar_JO-kareem-medium.onnx"
 
 # -----------------------------
 # 🧠 Mémoire conversations
@@ -48,6 +49,11 @@ MODEL_PATH = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\fr_FR-upmc-med
 CONVERSATIONS = {}
 MAX_HISTORY = 6  # garder derniers échanges
 
+# -----------------------------
+# 🌐 LANGUAGE CHECK
+# -----------------------------
+def is_arabic(text):
+    return bool(re.search(r'[\u0600-\u06FF]', text))
 
 # -----------------------------
 # 📚 SPLIT
@@ -192,21 +198,28 @@ def search_qdrant(query, top_k=3):
 # -----------------------------
 # 🤖 LLM
 # -----------------------------
-def ask_llm(question, context, history, session_id):
+def ask_llm(question, context, history, session_id, lang):
 
+    if lang == "ar":
+        language_instruction = "Répond uniquement en arabe (العربية)"
+    else:
+        language_instruction = "Répond uniquement en français"
 
     if not settings.GROQ_API_KEY:
         yield "Erreur : clé API Groq manquante."
         return
 
 
-    system_prompt = f"""
-Tu es un assistant spécialisé en élevage bovin.
+    system_prompt = f"""{language_instruction}
 
+Tu es un assistant spécialisé en élevage bovin.
 
 OBJECTIF :
 Aider l’utilisateur avec des réponses utiles sur les vaches.
 
+IMPORTANT:
+- Ignore complètement la langue des messages précédents
+- Répond UNIQUEMENT dans la langue demandée
 
 RÈGLES :
 
@@ -215,11 +228,16 @@ RÈGLES :
 - Si l'utilisateur dit au revoir (ex: "au revoir", "bye", "à bientôt") → répondre poliment et terminer la conversation (ne pas poser de nouvelle question)
 
 
-- Si la question est hors sujet (pas liée aux vaches) :
+- Si la question n'est pas liée aux vaches :
 → répondre :
+FR:
 "Je suis spécialisé en élevage bovin 🐄. Je ne peux pas répondre à cette question."
+AR:
+"أنا متخصص في تربية الأبقار 🐄 ولا يمكنني الإجابة على هذا السؤال."
+
 - Ne jamais répondre à "au revoir" par une question
 - Réponse courte et finale
+- La langue ne doit jamais influencer la compréhension
 
 - Si le CONTEXTE est vide :
 → répondre en utilisant tes connaissances générales sur les vaches
@@ -240,7 +258,12 @@ CONTEXTE :
 
     messages = [{"role": "system", "content": system_prompt}]
     messages.extend(history)
-    messages.append({"role": "user", "content": question})
+    if lang == "ar":
+        user_content = f"أجب بالعربية فقط: {question}"
+    else:
+        user_content = f"Réponds en français uniquement: {question}"
+
+    messages.append({"role": "user", "content": user_content})
 
     try:
         stream = client.chat.completions.create(
@@ -263,7 +286,7 @@ CONTEXTE :
         history.append({"role": "user", "content": question})
         history.append({"role": "assistant", "content": full_response})
 
-        CONVERSATIONS[ session_id ] = history[-MAX_HISTORY:]
+        CONVERSATIONS[session_id] = history[-MAX_HISTORY:]
 
     except Exception as e:
         yield f"\nErreur LLM: {str(e)}"
@@ -282,22 +305,49 @@ def chat(request):
 
     message = body.get("message")
     session_id = body.get("session_id", "default")
+    lang = body.get("lang", "fr")
+
+    session_key = f"{session_id}_{lang}"
 
     if not isinstance(message, str):
         return JsonResponse({"error": "Invalid message"}, status=400)
 
-    if session_id not in CONVERSATIONS:
-        CONVERSATIONS[session_id] = []
+    # -----------------------------
+    # 🔥 LANGUAGE CONTROL (AJOUT)
+    # -----------------------------
+    if lang == "fr" and is_arabic(message):
+        return StreamingHttpResponse(
+            iter(["Veuillez écrire en français 🇫🇷 ou changez la langue"]),
+            content_type="text/plain"
+)
 
-    history = CONVERSATIONS[session_id]
+    if lang == "ar" and not is_arabic(message):
+        return StreamingHttpResponse(
+            iter(["يرجى الكتابة باللغة العربية 🇸🇦 أو تغيير اللغة"]),
+            content_type="text/plain"
+)
 
+    # -----------------------------
+    # 🧠 MEMORY
+    # -----------------------------
+    if session_key not in CONVERSATIONS:
+        CONVERSATIONS[session_key] = []
+
+    history = CONVERSATIONS[session_key]
+
+    # -----------------------------
+    # 🔍 RAG
+    # -----------------------------
     results = search_qdrant(message)
     context = "\n\n".join(results) if results else ""
 
+    # -----------------------------
+    # 🤖 LLM
+    # -----------------------------
     return StreamingHttpResponse(
-    ask_llm(message, context, history, session_id),
-    content_type="text/plain"
-)
+        ask_llm(message, context, history, session_key, lang),
+        content_type="text/plain"
+    )
 
 
 # -----------------------------
@@ -355,12 +405,18 @@ def stt(request):
 # -----------------------------
 # TTS
 # -----------------------------
-def generate_tts(text):
+def generate_tts(text, lang):
     tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
     output_path = tmp_file.name
 
+    # 🔥 choix du modèle
+    if lang == "ar":
+        model_path = MODEL_AR
+    else:
+        model_path = MODEL_FR
+
     process = subprocess.Popen(
-        [PIPER_PATH, "--model", MODEL_PATH, "--output_file", output_path],
+        [PIPER_PATH, "--model", model_path, "--output_file", output_path],
         stdin=subprocess.PIPE,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
@@ -376,11 +432,12 @@ def generate_tts(text):
 def tts(request):
     body = json.loads(request.body.decode("utf-8"))
     text = body.get("text", "")
+    lang = body.get("lang", "fr")  # 🔥 AJOUT
 
     if not text:
         return JsonResponse({"error": "No text"}, status=400)
 
-    audio_path = generate_tts(text)
+    audio_path = generate_tts(text, lang)
 
     response = FileResponse(open(audio_path, "rb"), content_type="audio/wav")
     response["Content-Disposition"] = "inline; filename=tts.wav"
