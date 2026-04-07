@@ -563,6 +563,7 @@ micBtn.onclick = async () => {
       const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
       const formData = new FormData();
       formData.append("audio", audioBlob, "audio.webm");
+      formData.append("lang", currentLang);
 
       try {
         const res = await fetch("http://127.0.0.1:8000/chatbot/stt/", {
@@ -571,18 +572,36 @@ micBtn.onclick = async () => {
         });
 
         const data = await res.json();
-        console.log("STT reçu:", data.text);
+        console.log("STT reçu:", data);
 
-        if (data.text && data.text.trim() !== "") {
+        if (data.status === "incomprehensible") {
+          // 🔥 Message discret dans le placeholder, pas d'alert
+          input.placeholder = currentLang === "ar"
+            ? "⚠️ صوت غير مفهوم، حاول مجدداً..."
+            : "⚠️ Audio incompréhensible, réessayez...";
+
+          // Remettre le placeholder normal après 3 secondes
+          setTimeout(() => {
+            input.placeholder = currentLang === "ar"
+              ? "اكتب سؤالك..."
+              : "Posez votre question…";
+          }, 3000);
+
+        } else if (data.text && data.text.trim() !== "") {
           input.value = data.text;
           input.focus();
-        } else {
-          alert("Aucune transcription");
         }
 
       } catch (err) {
         console.error(err);
-        alert("Erreur STT");
+        input.placeholder = currentLang === "ar"
+          ? "⚠️ خطأ، حاول مجدداً..."
+          : "⚠️ Erreur réseau, réessayez...";
+        setTimeout(() => {
+          input.placeholder = currentLang === "ar"
+            ? "اكتب سؤالك..."
+            : "Posez votre question…";
+        }, 3000);
       }
     };
 

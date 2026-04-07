@@ -56,6 +56,45 @@ def is_arabic(text):
     return bool(re.search(r'[\u0600-\u06FF]', text))
 
 # -----------------------------
+# 🧹 CLEAN TEXT (AJOUT
+# -----------------------------)
+def clean_text(text, lang):
+    text = text.strip()
+
+    if lang == "fr":
+        #garder lettres + accents + chiffres + espaces
+        text = re.sub(r"[^a-zA-ZÀ-ÿ0-9\s']", "", text)
+
+    elif lang == "ar":
+        #garder arabe + chiffres + espaces
+        text = re.sub(r"[^\u0600-\u06FF0-9\s]", "", text)
+    return text
+
+# -----------------------------
+# 🧹 VALIDATE TEXT
+# -----------------------------
+def is_valid_text(text, lang):
+    if not text or len(text.strip()) < 3:
+        return False
+
+    words = text.split()
+
+    # trop peu de mots → suspect
+    if len(words) < 2:
+        return False
+
+    if lang == "fr":
+        # ratio mots "normaux"
+        valid_words = sum(1 for w in words if re.match(r"^[a-zA-ZÀ-ÿ']+$", w))
+        return valid_words / len(words) > 0.6
+
+    elif lang == "ar":
+        valid_words = sum(1 for w in words if re.match(r"^[\u0600-\u06FF]+$", w))
+        return valid_words / len(words) > 0.6
+
+    return True
+
+# -----------------------------
 # 📚 SPLIT
 # -----------------------------
 def split_text_into_chunks(text, chunk_size=800, overlap=100):
@@ -198,6 +237,37 @@ def search_qdrant(query, top_k=3):
 # -----------------------------
 # 🤖 LLM
 # -----------------------------
+def correct_stt_with_llm(raw_text, lang):
+    if lang == "ar":
+        prompt = f"""أنت مصحح للنصوص المنطوقة باللغة العربية.
+النص المُفرَّغ (قد يحتوي أخطاء): "{raw_text}"
+
+القواعد الصارمة:
+- إذا كان النص يشبه العربية المنطوقة → صحح الإملاء والنحو، طبّع الحروف (أ إ آ)، وأعد النص المصحح فقط
+- إذا كان النص غير مفهوم أو ضوضاء أو ليس عربياً → أعد بالضبط: INVALID
+- لا تعيد شيئاً غير النص المصحح أو كلمة INVALID"""
+    else:
+        prompt = f"""Tu es un correcteur de transcription vocale française.
+Texte transcrit (peut contenir des erreurs): "{raw_text}"
+
+RÈGLES STRICTES:
+- Si le texte ressemble à du français parlé → corrige orthographe et grammaire, retourne UNIQUEMENT le texte corrigé
+- Si le texte est incompréhensible, du bruit, ou pas du français → retourne exactement: INVALID
+- Ne retourne RIEN d'autre que le texte corrigé ou le mot INVALID
+- Exemples: "la banne mange pa" → "La vache ne mange pas" | "xzqr ttt" → INVALID"""
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_completion_tokens=100,
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"STT correction error: {e}")
+        return raw_text  # fallback si Groq down
+
 def ask_llm(question, context, history, session_id, lang):
 
     if lang == "ar":
@@ -356,6 +426,9 @@ def chat(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def stt(request):
+    lang = request.POST.get("lang", "fr")
+    if lang not in ["fr", "ar"]:
+        lang = "fr"
     try:
         audio_file = request.FILES.get("audio")
         if not audio_file:
@@ -381,7 +454,10 @@ def stt(request):
 
         def transcribe():
             try:
-                result = whisper_model.transcribe(output_path)
+                if lang == "ar":
+                    result = whisper_model.transcribe(output_path, language="ar")
+                else:
+                    result = whisper_model.transcribe(output_path, language="fr")
                 result_queue.put(result["text"])
             except Exception as e:
                 result_queue.put("")
@@ -389,13 +465,25 @@ def stt(request):
         t = threading.Thread(target=transcribe)
         t.start()
         t.join(timeout=30)
-
+        
         if not result_queue.empty():
-            text = result_queue.get()
-            print("TRANSCRIPTION:", text)
-            return JsonResponse({"text": text})
+            text = result_queue.get().strip()
+            text = clean_text(text, lang)
+
+            if not is_valid_text(text, lang):
+                return JsonResponse({"text": "", "status": "incomprehensible"})
+
+            # 🔥 Correction LLM
+            corrected = correct_stt_with_llm(text, lang)
+            print(f"STT brut: {text} → corrigé: {corrected}")
+
+            if corrected.strip().upper().replace(".", "").replace("!", "") == "INVALID":
+                return JsonResponse({"text": "", "status": "incomprehensible"})
+
+            return JsonResponse({"text": corrected, "status": "ok"})
         else:
             return JsonResponse({"error": "Timeout"}, status=504)
+        
 
     except Exception as e:
         print("ERROR:", e)
@@ -432,7 +520,7 @@ def generate_tts(text, lang):
 def tts(request):
     body = json.loads(request.body.decode("utf-8"))
     text = body.get("text", "")
-    lang = body.get("lang", "fr")  # 🔥 AJOUT
+    lang = body.get("lang", "fr")  
 
     if not text:
         return JsonResponse({"error": "No text"}, status=400)
