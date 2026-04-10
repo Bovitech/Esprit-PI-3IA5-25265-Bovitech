@@ -1,25 +1,38 @@
+from cProfile import label
+from email import message
 import json
 import os
+from pyexpat.errors import messages
 import time
-import re  
+import re
+from urllib import response  
 import whisper
 import subprocess
 import threading
 import queue
 import tempfile
+import requests
+import math
 from django.http import JsonResponse, StreamingHttpResponse, FileResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.shortcuts import render
+from .models import Conversation
 
 from groq import Groq
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from sentence_transformers import SentenceTransformer
 
+def frontend(request):
+    return render(request, "index.html")
+
+#Conversation.objects.all().delete()
+print("🧹 Conversations reset (mode test)")
 
 # -----------------------------
-# 🔥 INIT
+#INIT
 # -----------------------------
 client = Groq(api_key=settings.GROQ_API_KEY)
 
@@ -33,7 +46,7 @@ embedding_model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
 COLLECTION_NAME = "bovin_chunks"
 
-whisper_model = whisper.load_model("base")
+whisper_model = None
 
 
 # -----------------------------
@@ -43,11 +56,6 @@ PIPER_PATH = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\piper.exe"
 MODEL_FR = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\fr_FR-upmc-medium.onnx"
 MODEL_AR = r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\ar_JO-kareem-medium.onnx"
 
-# -----------------------------
-# 🧠 Mémoire conversations
-# -----------------------------
-CONVERSATIONS = {}
-MAX_HISTORY = 6  # garder derniers échanges
 
 # -----------------------------
 # 🌐 LANGUAGE CHECK
@@ -95,7 +103,7 @@ def is_valid_text(text, lang):
     return True
 
 # -----------------------------
-# 📚 SPLIT
+# SPLIT
 # -----------------------------
 def split_text_into_chunks(text, chunk_size=800, overlap=100):
     chunks = []
@@ -120,7 +128,7 @@ def split_text_into_chunks(text, chunk_size=800, overlap=100):
 
 
 # -----------------------------
-# 📚 LOAD CHUNKS
+# LOAD CHUNKS
 # -----------------------------
 def load_all_chunks():
     knowledge_dir = os.path.join(settings.BASE_DIR, "knowledge_base")
@@ -147,7 +155,7 @@ def load_all_chunks():
 
 
 # -----------------------------
-# 🔥 EMBEDDING
+# EMBEDDING
 # -----------------------------
 def embed_text(text):
     return embedding_model.encode(text).tolist()
@@ -156,7 +164,7 @@ def embed_text(text):
 
 
 # -----------------------------
-# 🚀 INITIALISER QDRANT + INDEX
+# INITIALISER QDRANT + INDEX
 # -----------------------------
 def init_qdrant():
 
@@ -202,14 +210,10 @@ def init_qdrant():
 
 
 
-# 🔥 lancer au démarrage
-init_qdrant()
-
-
-
+qdrant_initialized = False
 
 # -----------------------------
-# 🔍 SEARCH QDRANT
+#SEARCH QDRANT
 # -----------------------------
 def search_qdrant(query, top_k=3):
     query_vector = embed_text(query)
@@ -233,9 +237,80 @@ def search_qdrant(query, top_k=3):
 
     return filtered
 
+# -----------------------------
+# 📍 DISTANCE
+# -----------------------------
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # rayon Terre en km
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+
+    a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
+    return R * (2 * math.atan2(math.sqrt(a), math.sqrt(1 - a)))
+
 
 # -----------------------------
-# 🤖 LLM
+# 🐄 VET AGEN
+# -----------------------------
+def vet_agent(lat, lon):
+    url = "https://overpass-api.de/api/interpreter"
+    radii = [5000, 10000, 20000]
+    vets = []
+
+    for radius in radii:
+        query = f"""
+        [out:json];
+        node["amenity"="veterinary"](around:{radius},{lat},{lon});
+        out;
+        """
+        try:
+            res = requests.post(url, data=query)
+            data = res.json()
+        except:
+            continue
+
+        for el in data.get("elements", []):
+            name = el.get("tags", {}).get("name", "Vétérinaire")
+            phone = el.get("tags", {}).get("phone", None)
+            vlat = el.get("lat")
+            vlon = el.get("lon")
+            distance = haversine(lat, lon, vlat, vlon)
+            vets.append({"name": name, "phone": phone, "lat": vlat, "lon": vlon, "distance": round(distance, 2)})
+
+        if vets:
+            break
+
+    if not vets:
+        return "<p>❌ Aucun vétérinaire trouvé. Essayez Google Maps ou augmentez la zone de recherche.</p>"
+
+    vets = sorted(vets, key=lambda x: x["distance"])
+    best = vets[0]
+    others = vets[1:3]
+
+    def map_link(v):
+        return f"https://www.google.com/maps/search/?api=1&query={v['lat']},{v['lon']}"
+
+    warning = "<p>⚠️ Aucun vétérinaire très proche, voici les plus proches disponibles :</p>" if best["distance"] > 10 else ""
+    phone_str = f"<p>📞 {best['phone']}</p>" if best["phone"] else "<p>📞 Téléphone non disponible</p>"
+    
+    others_html = ""
+    if others:
+        items = "".join(f"<li>{v['name']} — {v['distance']} km</li>" for v in others)
+        others_html = f"<p><strong>🔹 Autres options :</strong></p><ul>{items}</ul>"
+
+    return f"""{warning}
+<div class="vet-card">
+  <p>🐄 <strong>Vétérinaire recommandé</strong></p>
+  <p>📍 <strong>{best['name']}</strong> — {best['distance']} km</p>
+  {phone_str}
+  <a href="{map_link(best)}" target="_blank" class="map-btn">📍 Voir sur Google Maps</a>
+</div>
+{others_html}"""
+
+# -----------------------------
+#LLM
 # -----------------------------
 def correct_stt_with_llm(raw_text, lang):
     if lang == "ar":
@@ -267,7 +342,37 @@ RÈGLES STRICTES:
     except Exception as e:
         print(f"STT correction error: {e}")
         return raw_text  # fallback si Groq down
+    
+def decide_action(question, context, history, lang):
+    system_prompt = """Tu es un classificateur strict. Une seule tâche : décider si l'utilisateur veut TROUVER UN VÉTÉRINAIRE PROCHE.
 
+Réponds VET uniquement si l'utilisateur demande explicitement :
+- un vétérinaire / vet / veterinaire / دكتور بيطري
+- quelqu'un pour soigner son animal
+- une clinique vétérinaire
+
+Pour TOUT le reste (questions sur les vaches, maladies, alimentation, salutations, etc.) → réponds NORMAL
+
+Réponds UNIQUEMENT par : VET ou NORMAL"""
+
+    messages = [{"role": "system", "content": system_prompt}]
+    messages.extend(history[-2:])
+    messages.append({"role": "user", "content": question})
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=messages,
+            temperature=0,
+            max_completion_tokens=5,
+        )
+        label = response.choices[0].message.content.strip().upper()
+        return {"action": "vet_agent"} if "VET" in label else {"action": "answer"}
+    except:
+        return {"action": "answer"}
+    
+    
+    
 def ask_llm(question, context, history, session_id, lang):
 
     if lang == "ar":
@@ -279,10 +384,11 @@ def ask_llm(question, context, history, session_id, lang):
         yield "Erreur : clé API Groq manquante."
         return
 
-
     system_prompt = f"""{language_instruction}
 
-Tu es un assistant spécialisé en élevage bovin.
+Tu es un assistant IA.
+
+Tu dois comprendre l'intention.
 
 OBJECTIF :
 Aider l’utilisateur avec des réponses utiles sur les vaches.
@@ -290,13 +396,17 @@ Aider l’utilisateur avec des réponses utiles sur les vaches.
 IMPORTANT:
 - Ignore complètement la langue des messages précédents
 - Répond UNIQUEMENT dans la langue demandée
+- Ne te base PAS sur des mots exacts
+- Comprends l'intention utilisateur
 
 RÈGLES :
 
-
 - Si la question est liée aux vaches → répondre normalement avec le contexte
 - Si l'utilisateur dit au revoir (ex: "au revoir", "bye", "à bientôt") → répondre poliment et terminer la conversation (ne pas poser de nouvelle question)
-
+- Les salutations comme "bonjour", "salut", "bjr", "bonjouuur" doivent toujours recevoir une réponse de salutation.
+- Ne jamais répondre "au revoir" sauf si l'utilisateur dit explicitement qu'il part.
+- Ne jamais dire "allez chercher sur Google".
+- Si des coordonnées GPS sont présentes, considérer que la localisation est activée
 
 - Si la question n'est pas liée aux vaches :
 → répondre :
@@ -325,65 +435,70 @@ CONTEXTE :
 {context}
 """
 
-
     messages = [{"role": "system", "content": system_prompt}]
     messages.extend(history)
-    if lang == "ar":
-        user_content = f"أجب بالعربية فقط: {question}"
-    else:
-        user_content = f"Réponds en français uniquement: {question}"
 
+    user_content = f"Réponds en {'arabe' if lang == 'ar' else 'français'} uniquement: {question}"
     messages.append({"role": "user", "content": user_content})
+
+    full_response = ""
 
     try:
         stream = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=messages,
             temperature=0.3,
-            max_completion_tokens=150,
-            stream=True  # 🔥 ICI
+            max_completion_tokens=200,  # ← légèrement augmenté
+            stream=True
         )
-
-        full_response = ""
 
         for chunk in stream:
             if chunk.choices[0].delta.content:
                 token = chunk.choices[0].delta.content
                 full_response += token
-                yield token  # 🔥 envoi direct
-
-        # 🧠 sauvegarder après streaming
-        history.append({"role": "user", "content": question})
-        history.append({"role": "assistant", "content": full_response})
-
-        CONVERSATIONS[session_id] = history[-MAX_HISTORY:]
+                yield token
 
     except Exception as e:
         yield f"\nErreur LLM: {str(e)}"
 
+    finally:
+        # ✅ Sauvegarde garantie même si le stream est interrompu
+        if full_response.strip():
+            Conversation.objects.create(
+                session_id=session_id,
+                role="assistant",
+                message=full_response
+            )
+
 
 # -----------------------------
-# 🔥 API
+#API
 # -----------------------------
 @csrf_exempt
 @require_http_methods(["POST"])
 def chat(request):
+    global qdrant_initialized
+
+    if not qdrant_initialized:
+        print("🔄 Initializing Qdrant...")
+        init_qdrant()
+        qdrant_initialized = True
     try:
         body = json.loads(request.body.decode("utf-8"))
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
-
+    
     message = body.get("message")
     session_id = body.get("session_id", "default")
     lang = body.get("lang", "fr")
-
-    session_key = f"{session_id}_{lang}"
+    lat = body.get("lat")
+    lon = body.get("lon")
 
     if not isinstance(message, str):
         return JsonResponse({"error": "Invalid message"}, status=400)
 
     # -----------------------------
-    # 🔥 LANGUAGE CONTROL (AJOUT)
+    #LANGUAGE CONTROL (AJOUT)
     # -----------------------------
     if lang == "fr" and is_arabic(message):
         return StreamingHttpResponse(
@@ -395,29 +510,57 @@ def chat(request):
         return StreamingHttpResponse(
             iter(["يرجى الكتابة باللغة العربية 🇸🇦 أو تغيير اللغة"]),
             content_type="text/plain"
+)     
+
+    Conversation.objects.create(
+        session_id=session_id,
+        role="user",
+        message=message
 )
-
     # -----------------------------
-    # 🧠 MEMORY
+    #MEMORY
     # -----------------------------
-    if session_key not in CONVERSATIONS:
-        CONVERSATIONS[session_key] = []
+    history_db = Conversation.objects.filter(
+        session_id=session_id
+    ).order_by('-created_at')[:10]
 
-    history = CONVERSATIONS[session_key]
-
+    history = []
+    for msg in reversed(history_db):
+        history.append({
+            "role": msg.role,
+            "content": msg.message
+        })
+        
     # -----------------------------
-    # 🔍 RAG
+    #RAG
     # -----------------------------
     results = search_qdrant(message)
     context = "\n\n".join(results) if results else ""
 
     # -----------------------------
-    # 🤖 LLM
+    # DECISION LLM (PROPRE)
+    # -----------------------------
+    decision = decide_action(message, context, history, lang)
+
+    # -----------------------------
+    # TOOL EXECUTION
+    # -----------------------------
+    if decision.get("action") == "vet_agent":
+        if lat is not None and lon is not None:
+            result = vet_agent(float(lat), float(lon))
+        else:
+            result = "📍 Veuillez activer la localisation pour trouver un vétérinaire proche"
+
+        return StreamingHttpResponse(iter([result]), content_type="text/plain")
+    
+    # -----------------------------
+    # 🤖 LLM NORMAL
     # -----------------------------
     return StreamingHttpResponse(
-        ask_llm(message, context, history, session_key, lang),
+        ask_llm(message, context, history, session_id, lang),
         content_type="text/plain"
     )
+
 
 
 # -----------------------------
@@ -426,6 +569,11 @@ def chat(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def stt(request):
+    global whisper_model
+
+    if whisper_model is None:
+        print("🔄 Loading Whisper model...")
+        whisper_model = whisper.load_model("base")
     lang = request.POST.get("lang", "fr")
     if lang not in ["fr", "ar"]:
         lang = "fr"

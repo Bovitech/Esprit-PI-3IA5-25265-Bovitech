@@ -283,6 +283,51 @@
     animation: fadeIn 0.2s ease;
   }
 
+  /* Carte vétérinaire */
+.vet-card {
+  background: var(--green-pale);
+  border: 1px solid var(--green-light);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 4px 0;
+  line-height: 2;
+}
+
+.map-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 7px 14px;
+  background: var(--green);
+  color: white;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s;
+}
+
+.map-btn:hover {
+  background: var(--green-light);
+}
+
+/* Messages bot — meilleure lisibilité */
+.msg.bot ul {
+  padding-left: 18px;
+  margin-top: 6px;
+}
+
+.msg.bot li {
+  margin-bottom: 4px;
+}
+
+.msg.bot p {
+  margin-bottom: 6px;
+}
+
+.msg.bot strong {
+  color: var(--green);
+}
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
@@ -336,8 +381,9 @@ const chatbox = document.getElementById("chatbox");
 const input = document.getElementById("message-input");
 const sendBtn = document.getElementById("send-btn");
 const micBtn = document.getElementById("mic-btn");
-// 🔥 LANGUE
+
 let currentLang = localStorage.getItem("lang") || "fr";
+let userLocation = { lat: null, lon: null };
 
 const langSelect = document.getElementById("lang-select");
 
@@ -389,7 +435,7 @@ function addMsg(text, role) {
 
   const msg = document.createElement("div");
   msg.className = "msg " + role;
-  msg.textContent = text;
+  msg.innerHTML = text; 
   row.appendChild(msg);
 
   let playBtn = null;
@@ -443,30 +489,48 @@ async function sendMessage(customText = null) {
   addMsg(text, "user");
   addTyping();
 
-  const { msg: botMsg, playBtn, stopBtn } = addMsg("", "bot");
-  removeTyping();
-
   try {
+    
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, session_id: sessionId, lang: currentLang })
+      body: JSON.stringify({
+      message: text,
+      session_id: sessionId,
+      lang: currentLang,
+      lat: userLocation.lat,
+      lon: userLocation.lon
+    })
     });
 
     if (!res.ok) {
-      botMsg.textContent = "Erreur serveur " + res.status;
+      removeTyping();
+      addMsg("❌ Server error", "bot");
       return;
     }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
-    let fullText = "";
+
+    let botMsg = null;
+    let playBtn = null;
+    let stopBtn = null;
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      fullText += decoder.decode(value, { stream: true });
-      botMsg.textContent = fullText;
+
+      const chunkText = decoder.decode(value, { stream: true });
+
+      if (!botMsg) {
+        removeTyping();
+        const created = addMsg("", "bot");
+        botMsg = created.msg;
+        playBtn = created.playBtn;
+        stopBtn = created.stopBtn;
+      }
+
+      botMsg.innerHTML += chunkText.replace(/\n/g, "<br>");
       chatbox.scrollTop = chatbox.scrollHeight;
     }
 
@@ -474,7 +538,8 @@ async function sendMessage(customText = null) {
 
   } catch (err) {
     console.error(err);
-    botMsg.textContent = "Erreur réseau";
+    removeTyping();
+    addMsg("❌ Network error", "bot");
   }
 }
 
@@ -507,9 +572,9 @@ async function playTTS(text, playBtn, stopBtn) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text,
-        lang: currentLang  
-      })
+      text: text,
+      lang: currentLang
+    })
     });
 
     const blob = await res.blob();
@@ -536,7 +601,10 @@ async function playTTS(text, playBtn, stopBtn) {
 
 sendBtn.onclick = () => sendMessage();
 input.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendMessage();
+  if (e.key === "Enter") {
+    e.preventDefault(); 
+    sendMessage();
+  }
 });
 
 // MICRO
@@ -620,6 +688,39 @@ micBtn.onclick = async () => {
     micBtn.classList.remove("recording");
     micBtn.title = "Microphone";
   }
+};
+
+function getLocation() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ lat: null, lon: null });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        console.log("✅ RAW POSITION:", pos); 
+
+        resolve({
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude
+        });
+      },
+      (err) => {
+        console.error("Location error:", err);
+        resolve({ lat: null, lon: null });
+      },
+      {
+        enableHighAccuracy: true,  
+        timeout: 10000,
+        maximumAge: 0               
+      }
+    );
+  });
+}
+window.onload = async () => {
+  userLocation = await getLocation();
+  console.log("📍 Location:", userLocation);
 };
 </script>
 </body>
