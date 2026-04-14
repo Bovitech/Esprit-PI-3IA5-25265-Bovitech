@@ -1,9 +1,7 @@
 """
 RAG retrieval layer.
-- Qdrant client is initialised once (thread-safe flag)
-- search() is the only public API
+All paths come from settings — no hardcoded directories here.
 """
-import os
 import logging
 import threading
 
@@ -21,9 +19,8 @@ CHUNK_OVERLAP   = 100
 SCORE_THRESHOLD = 0.5
 TOP_K           = 3
 
-# Module-level singletons — created once, reused forever
-_qdrant: QdrantClient | None        = None
-_embedder: SentenceTransformer | None = None
+_qdrant:    QdrantClient | None        = None
+_embedder:  SentenceTransformer | None = None
 _init_lock   = threading.Lock()
 _initialized = False
 
@@ -31,7 +28,8 @@ _initialized = False
 def _get_qdrant() -> QdrantClient:
     global _qdrant
     if _qdrant is None:
-        _qdrant = QdrantClient(path=str(settings.BASE_DIR / "qdrant_data"))
+        # Path comes from settings.QDRANT_PATH — set in settings.py
+        _qdrant = QdrantClient(path=str(settings.QDRANT_PATH))
     return _qdrant
 
 
@@ -57,9 +55,10 @@ def _split(text: str) -> list[str]:
 
 
 def _load_chunks() -> list[str]:
-    knowledge_dir = settings.BASE_DIR / "backend" / "knowledge_base"
+    # Path comes from settings.KNOWLEDGE_BASE_DIR — set in settings.py
+    knowledge_dir = settings.KNOWLEDGE_BASE_DIR
     if not knowledge_dir.exists():
-        logger.warning("knowledge_base directory not found at %s", knowledge_dir)
+        logger.warning("knowledge_base not found at %s", knowledge_dir)
         return []
     chunks = []
     for path in knowledge_dir.glob("*.txt"):
@@ -73,11 +72,11 @@ def init() -> None:
     if _initialized:
         return
     with _init_lock:
-        if _initialized:          # double-checked locking
+        if _initialized:
             return
-        client     = _get_qdrant()
-        collection_names = [c.name for c in client.get_collections().collections]
-        if COLLECTION_NAME not in collection_names:
+        client = _get_qdrant()
+        existing = [c.name for c in client.get_collections().collections]
+        if COLLECTION_NAME not in existing:
             client.create_collection(
                 collection_name=COLLECTION_NAME,
                 vectors_config=VectorParams(size=384, distance=Distance.COSINE),
@@ -93,7 +92,6 @@ def init() -> None:
 
 
 def search(query: str, top_k: int = TOP_K) -> list[str]:
-    """Return relevant text chunks for the query."""
     init()
     results = _get_qdrant().query_points(
         collection_name=COLLECTION_NAME,

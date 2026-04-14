@@ -11,13 +11,15 @@
     --green-light: #40916c;
     --green-pale: #d8f3dc;
     --cream: #faf7f2;
-    --brown: #6b4f3a;
     --text: #1a1a1a;
     --muted: #7a7a6e;
     --border: #e8e2d9;
     --user-bg: #2d6a4f;
     --bot-bg: #ffffff;
     --radius: 18px;
+    --red: #c0392b;
+    --orange: #e67e22;
+    --blue: #2980b9;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -29,8 +31,9 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: radial-gradient(circle at 20% 80%, #d8f3dc44 0%, transparent 50%),
-                      radial-gradient(circle at 80% 20%, #b7e4c744 0%, transparent 50%);
+    background-image:
+      radial-gradient(circle at 20% 80%, #d8f3dc44 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, #b7e4c744 0%, transparent 50%);
   }
 
   .app {
@@ -41,7 +44,7 @@
     display: flex;
     flex-direction: column;
     border: 1px solid var(--border);
-    box-shadow: 0 8px 40px rgba(45, 106, 79, 0.12), 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 40px rgba(45,106,79,0.12), 0 2px 8px rgba(0,0,0,0.06);
     overflow: hidden;
   }
 
@@ -53,387 +56,211 @@
     align-items: center;
     gap: 12px;
     background: white;
+    flex-shrink: 0;
   }
-
   .header-icon {
-    width: 42px;
-    height: 42px;
+    width: 42px; height: 42px;
     background: var(--green-pale);
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 22px;
   }
-
   .header-text h1 {
     font-family: 'DM Serif Display', serif;
-    font-size: 18px;
-    font-weight: 400;
-    color: var(--text);
-    letter-spacing: -0.3px;
+    font-size: 18px; font-weight: 400;
+    color: var(--text); letter-spacing: -0.3px;
   }
+  .header-text p { font-size: 12px; color: var(--muted); font-weight: 300; margin-top: 1px; }
 
-  .header-text p {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 300;
-    margin-top: 1px;
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+  select#lang-select {
+    padding: 6px 10px; border-radius: 10px;
+    border: 1px solid #ddd; background: white;
+    cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif;
   }
 
   .status-dot {
-    width: 7px;
-    height: 7px;
-    background: #52b788;
+    width: 7px; height: 7px; background: #52b788;
     border-radius: 50%;
-    margin-left: auto;
     box-shadow: 0 0 0 3px #d8f3dc;
     animation: pulse 2s infinite;
   }
-
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 3px #d8f3dc; }
-    50% { box-shadow: 0 0 0 5px #d8f3dc88; }
+    0%,100% { box-shadow: 0 0 0 3px #d8f3dc; }
+    50%      { box-shadow: 0 0 0 5px #d8f3dc88; }
   }
 
   /* CHATBOX */
   #chatbox {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; overflow-y: auto;
     padding: 20px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: flex; flex-direction: column; gap: 12px;
     scroll-behavior: smooth;
   }
-
   #chatbox::-webkit-scrollbar { width: 4px; }
   #chatbox::-webkit-scrollbar-track { background: transparent; }
   #chatbox::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-  .msg-row {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
+  .msg-row { display: flex; flex-direction: column; gap: 4px; }
   .msg-row.user { align-items: flex-end; }
-  .msg-row.bot { align-items: flex-start; }
+  .msg-row.bot  { align-items: flex-start; }
 
   .msg {
-    padding: 11px 15px;
-    border-radius: var(--radius);
-    max-width: 78%;
-    font-size: 14px;
-    line-height: 1.6;
-    white-space: pre-wrap;
+    padding: 11px 15px; border-radius: var(--radius);
+    max-width: 82%; font-size: 14px; line-height: 1.6;
     word-break: break-word;
   }
-
   .msg.user {
-    background: var(--user-bg);
-    color: white;
+    background: var(--user-bg); color: white;
     border-bottom-right-radius: 5px;
   }
-
   .msg.bot {
-    background: var(--bot-bg);
-    color: var(--text);
+    background: var(--bot-bg); color: var(--text);
     border: 1px solid var(--border);
     border-bottom-left-radius: 5px;
+    white-space: pre-wrap;
   }
+  .msg.bot ul  { padding-left: 18px; margin-top: 6px; }
+  .msg.bot li  { margin-bottom: 4px; }
+  .msg.bot p   { margin-bottom: 6px; }
+  .msg.bot strong { color: var(--green); }
 
-  /* TTS controls under bot message */
-  .tts-controls {
-    display: flex;
-    gap: 6px;
-    padding-left: 4px;
-  }
-
+  /* TTS controls */
+  .tts-controls { display: flex; gap: 6px; padding-left: 4px; }
   .tts-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 12px;
-    color: var(--muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.15s;
-    font-family: 'DM Sans', sans-serif;
+    background: none; border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 10px; font-size: 12px;
+    color: var(--muted); cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: all 0.15s; font-family: 'DM Sans', sans-serif;
   }
-
-  .tts-btn:hover:not(:disabled) {
-    background: var(--green-pale);
-    border-color: var(--green-light);
-    color: var(--green);
-  }
-
-  .tts-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  .tts-btn.playing {
-    background: var(--green-pale);
-    border-color: var(--green);
-    color: var(--green);
-  }
+  .tts-btn:hover:not(:disabled) { background: var(--green-pale); border-color: var(--green-light); color: var(--green); }
+  .tts-btn:disabled { opacity: 0.4; cursor: default; }
+  .tts-btn.playing  { background: var(--green-pale); border-color: var(--green); color: var(--green); }
 
   /* COMPOSER */
   .composer {
-    padding: 12px 14px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: white;
+    padding: 12px 14px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    background: white; flex-shrink: 0;
   }
-
   #message-input {
-    flex: 1;
-    padding: 10px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
+    flex: 1; padding: 10px 14px; border-radius: 20px;
+    border: 1px solid var(--border); font-size: 14px;
+    font-family: 'DM Sans', sans-serif; background: var(--cream);
+    color: var(--text); outline: none; transition: border-color 0.15s;
   }
-
-  #message-input:focus {
-    border-color: var(--green-light);
-    background: white;
-  }
-
+  #message-input:focus  { border-color: var(--green-light); background: white; }
   #message-input::placeholder { color: var(--muted); }
 
   .icon-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    transition: all 0.15s;
-    flex-shrink: 0;
+    width: 40px; height: 40px; border-radius: 50%; border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 17px; transition: all 0.15s; flex-shrink: 0;
   }
-
-  #mic-btn {
-    background: var(--green-pale);
-    color: var(--green);
-  }
-
+  #mic-btn  { background: var(--green-pale); color: var(--green); }
   #mic-btn:hover { background: #b7e4c7; }
-
   #mic-btn.recording {
-    background: #ffe0e0;
-    color: #c0392b;
+    background: #ffe0e0; color: var(--red);
     animation: rec-pulse 1s infinite;
   }
-
   @keyframes rec-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.3); }
-    50% { box-shadow: 0 0 0 6px rgba(192, 57, 43, 0); }
+    0%,100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.3); }
+    50%      { box-shadow: 0 0 0 6px rgba(192,57,43,0); }
   }
-
-  #send-btn {
-    background: var(--green);
-    color: white;
-  }
-
+  #send-btn { background: var(--green); color: white; }
   #send-btn:hover { background: var(--green-light); }
 
   /* Typing indicator */
   .typing {
-    display: flex;
-    gap: 4px;
-    padding: 14px 16px;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    border-bottom-left-radius: 5px;
+    display: flex; gap: 4px; padding: 14px 16px;
+    background: white; border: 1px solid var(--border);
+    border-radius: var(--radius); border-bottom-left-radius: 5px;
     width: fit-content;
   }
-
   .typing span {
-    width: 6px;
-    height: 6px;
-    background: var(--muted);
-    border-radius: 50%;
-    animation: bounce 1.2s infinite;
+    width: 6px; height: 6px; background: var(--muted);
+    border-radius: 50%; animation: bounce 1.2s infinite;
   }
-
   .typing span:nth-child(2) { animation-delay: 0.2s; }
   .typing span:nth-child(3) { animation-delay: 0.4s; }
-
   @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-    30% { transform: translateY(-5px); opacity: 1; }
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30%          { transform: translateY(-5px); opacity: 1; }
   }
 
-  .fade-in {
-    animation: fadeIn 0.2s ease;
-  }
-
-  /* Carte vétérinaire */
-.vet-card {
-  background: var(--green-pale);
-  border: 1px solid var(--green-light);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin: 4px 0;
-  line-height: 2;
-}
-
-.map-btn {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 7px 14px;
-  background: var(--green);
-  color: white;
-  border-radius: 10px;
-  text-decoration: none;
-  font-size: 13px;
-  font-family: 'DM Sans', sans-serif;
-  transition: background 0.15s;
-}
-
-.map-btn:hover {
-  background: var(--green-light);
-}
-
-/* Messages bot — meilleure lisibilité */
-.msg.bot ul {
-  padding-left: 18px;
-  margin-top: 6px;
-}
-
-.msg.bot li {
-  margin-bottom: 4px;
-}
-
-.msg.bot p {
-  margin-bottom: 6px;
-}
-
-.msg.bot strong {
-  color: var(--green);
-}
-
-/* Meteo card */
-.meteo-card {
-  border: 2px solid #2d6a4f;
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin: 4px 0;
-  background: white;
-  line-height: 1.9;
-  font-size: 14px;
-}
-
-.meteo-header {
-  font-weight: 600;
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-
-.meteo-verdict {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.meteo-stats {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 6px 0;
-  background: var(--cream);
-  border-radius: 8px;
-  padding: 5px 10px;
-  display: inline-block;
-}
-
-.meteo-reason {
-  margin-top: 4px;
-}
-
-.meteo-tip {
-  margin-top: 6px;
-  font-style: italic;
-  color: var(--muted);
-}
-
-/* Feed card */
-.feed-card {
-  border: 2px solid #52b788;
-  border-radius: 14px;
-  padding: 14px 16px;
-  background: white;
-  margin: 4px 0;
-  line-height: 1.9;
-  font-size: 14px;
-}
-
-.feed-title {
-  font-weight: 700;
-  font-size: 15px;
-  margin-bottom: 6px;
-  color: var(--green);
-}
-
-.feed-stats {
-  font-size: 12px;
-  color: var(--muted);
-  background: var(--cream);
-  border-radius: 8px;
-  padding: 4px 10px;
-  display: inline-block;
-  margin-bottom: 8px;
-}
-
-.feed-row {
-  display: flex;
-  gap: 8px;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.feed-label {
-  font-weight: 600;
-  min-width: 140px;
-  color: var(--text);
-}
-
-.feed-warning {
-  margin-top: 8px;
-  color: #e67e22;
-  font-weight: 600;
-}
-
-.feed-tip {
-  margin-top: 8px;
-  font-style: italic;
-  color: var(--muted);
-}
-
-/* Meteo rain warning */
-.meteo-rain-warn {
-  color: #2980b9;
-  font-size: 13px;
-  margin: 4px 0;
-}
-
+  .fade-in { animation: fadeIn 0.2s ease; }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ============================================================
+     AGENT CARDS — rendered from JSON data, not HTML strings
+     ============================================================ */
+
+  /* Shared card base */
+  .agent-card {
+    border-radius: 14px; padding: 14px 16px;
+    font-size: 14px; line-height: 1.9;
+    max-width: 100%; width: 100%;
+  }
+
+  /* --- VET CARD --- */
+  .vet-card {
+    background: var(--green-pale);
+    border: 1px solid var(--green-light);
+  }
+  .vet-card .card-title { font-weight: 700; font-size: 15px; color: var(--green); margin-bottom: 6px; }
+  .vet-card .vet-name   { font-weight: 600; }
+  .vet-card .vet-dist   { color: var(--muted); font-size: 13px; }
+  .vet-card .vet-phone  { color: var(--muted); font-size: 13px; }
+  .vet-card .vet-others { margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+  .vet-card .vet-others p { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .vet-card .vet-others li { font-size: 13px; color: var(--text); }
+  .map-btn {
+    display: inline-block; margin-top: 8px;
+    padding: 7px 14px; background: var(--green); color: white;
+    border-radius: 10px; text-decoration: none;
+    font-size: 13px; font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+  .map-btn:hover { background: var(--green-light); }
+  .vet-warning { color: var(--orange); font-size: 13px; margin-bottom: 6px; }
+
+  /* --- METEO CARD --- */
+  .meteo-card { background: white; border: 2px solid var(--green); }
+  .meteo-card .meteo-header  { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+  .meteo-card .meteo-verdict { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .meteo-card .meteo-stats {
+    color: var(--muted); font-size: 12px;
+    background: var(--cream); border-radius: 8px;
+    padding: 4px 10px; display: inline-block; margin-bottom: 8px;
+  }
+  .meteo-card .meteo-reason { margin-top: 4px; }
+  .meteo-card .meteo-tip    { margin-top: 6px; font-style: italic; color: var(--muted); }
+  .meteo-card .meteo-rain   { color: var(--blue); font-size: 13px; margin: 4px 0; }
+
+  /* --- FEED CARD --- */
+  .feed-card { background: white; border: 2px solid #52b788; }
+  .feed-card .feed-title {
+    font-weight: 700; font-size: 15px;
+    color: var(--green); margin-bottom: 6px;
+  }
+  .feed-card .feed-stats {
+    font-size: 12px; color: var(--muted);
+    background: var(--cream); border-radius: 8px;
+    padding: 4px 10px; display: inline-block; margin-bottom: 8px;
+  }
+  .feed-card .feed-row {
+    display: flex; gap: 8px; padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .feed-card .feed-row:last-of-type { border-bottom: none; }
+  .feed-card .feed-label { font-weight: 600; min-width: 130px; color: var(--text); }
+  .feed-card .feed-warning { color: var(--orange); font-weight: 600; margin-top: 8px; }
+  .feed-card .feed-tip    { margin-top: 8px; font-style: italic; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -445,22 +272,13 @@
       <h1 id="app-title">BovItech</h1>
       <p id="app-subtitle">Assistant spécialisé en élevage bovin</p>
     </div>
-
-    <!-- 🔥 AJOUT ICI -->
-    <select id="lang-select" style="
-      margin-left: auto;
-      padding: 6px 10px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      background: white;
-      cursor: pointer;
-      font-size: 12px;
-    ">
-      <option value="fr">Français</option>
-      <option value="ar">العربية</option>
-    </select>
-
-    <div class="status-dot"></div>
+    <div class="header-right">
+      <select id="lang-select">
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+      <div class="status-dot"></div>
+    </div>
   </div>
 
   <div id="chatbox"></div>
@@ -478,97 +296,91 @@
 </div>
 
 <script>
-const API_URL = "http://127.0.0.1:8000/chatbot/";
-const chatbox = document.getElementById("chatbox");
-const input = document.getElementById("message-input");
-const sendBtn = document.getElementById("send-btn");
-const micBtn = document.getElementById("mic-btn");
+const API_URL   = "http://127.0.0.1:8000/chatbot/";
+const STT_URL   = "http://127.0.0.1:8000/chatbot/stt/";
+const TTS_URL   = "http://127.0.0.1:8000/chatbot/tts/";
 
-let currentLang = localStorage.getItem("lang") || "fr";
-let userLocation = { lat: null, lon: null };
-
+const chatbox   = document.getElementById("chatbox");
+const input     = document.getElementById("message-input");
+const sendBtn   = document.getElementById("send-btn");
+const micBtn    = document.getElementById("mic-btn");
 const langSelect = document.getElementById("lang-select");
 
-//init
-langSelect.value = currentLang;
-
-//appliquer direction au chargement
-document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
-
-// placeholder dynamique
-input.placeholder = currentLang === "ar"
-  ? "اكتب سؤالك..."
-  : "Posez votre question…";
-
-//changement langue
-langSelect.onchange = () => {
-  currentLang = langSelect.value;
-  localStorage.setItem("lang", currentLang);
-
-  document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
-
-  input.placeholder = currentLang === "ar"
-    ? "اكتب سؤالك..."
-    : "Posez votre question…";
-  updateLanguageUI(); // 🔥 AJOUT ICI
-};
-
-let sessionId = localStorage.getItem("session_id") || crypto.randomUUID();
+let currentLang  = localStorage.getItem("lang") || "fr";
+let userLocation = { lat: null, lon: null };
+let sessionId    = localStorage.getItem("session_id") || crypto.randomUUID();
 localStorage.setItem("session_id", sessionId);
 
-let currentAudio = null;
-let currentPlayBtn = null;
-let currentStopBtn = null;
+// Init UI
+langSelect.value       = currentLang;
+document.body.dir      = currentLang === "ar" ? "rtl" : "ltr";
+input.placeholder      = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+updateLanguageUI();
+
+langSelect.onchange = () => {
+  currentLang        = langSelect.value;
+  localStorage.setItem("lang", currentLang);
+  document.body.dir  = currentLang === "ar" ? "rtl" : "ltr";
+  input.placeholder  = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+  updateLanguageUI();
+};
 
 function updateLanguageUI() {
   if (currentLang === "ar") {
-    document.getElementById("app-title").textContent = "بوفيتاك";
+    document.getElementById("app-title").textContent    = "بوفيتاك";
     document.getElementById("app-subtitle").textContent = "مساعد متخصص في تربية الأبقار";
   } else {
-    document.getElementById("app-title").textContent = "BovItech";
+    document.getElementById("app-title").textContent    = "BovItech";
     document.getElementById("app-subtitle").textContent = "Assistant spécialisé en élevage bovin";
   }
 }
-updateLanguageUI();
 
-function addMsg(text, role) {
-  const row = document.createElement("div");
-  row.className = "msg-row " + role + " fade-in";
+// ---------------------------------------------------------------
+// TTS STATE
+// ---------------------------------------------------------------
+let currentAudio   = null;
+let currentPlayBtn = null;
+let currentStopBtn = null;
 
-  const msg = document.createElement("div");
-  msg.className = "msg " + role;
-  msg.innerHTML = text; 
-  row.appendChild(msg);
-
-  let playBtn = null;
-  let stopBtn = null;
-
-  if (role === "bot") {
-    const controls = document.createElement("div");
-    controls.className = "tts-controls";
-
-    playBtn = document.createElement("button");
-    playBtn.className = "tts-btn";
-    playBtn.innerHTML = "🔊 Écouter";
-    playBtn.disabled = true;
-    playBtn.onclick = () => playTTS(msg.textContent, playBtn, stopBtn);
-
-    stopBtn = document.createElement("button");
-    stopBtn.className = "tts-btn";
-    stopBtn.innerHTML = "⏹ Stop";
-    stopBtn.disabled = true;
-    stopBtn.onclick = () => stopAudio();
-
-    controls.appendChild(playBtn);
-    controls.appendChild(stopBtn);
-    row.appendChild(controls);
+function stopAudio() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  if (currentPlayBtn) {
+    currentPlayBtn.innerHTML = "🔊 Écouter";
+    currentPlayBtn.classList.remove("playing");
+    currentPlayBtn.disabled = false;
   }
-
-  chatbox.appendChild(row);
-  chatbox.scrollTop = chatbox.scrollHeight;
-  return { msg, playBtn, stopBtn };
+  if (currentStopBtn) currentStopBtn.disabled = true;
+  currentPlayBtn = currentStopBtn = null;
 }
 
+async function playTTS(text, playBtn, stopBtn) {
+  stopAudio();
+  try {
+    playBtn.innerHTML = "⏳…"; playBtn.disabled = true;
+    const res  = await fetch(TTS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, lang: currentLang }),
+    });
+    if (!res.ok) throw new Error("TTS failed");
+    const blob = await res.blob();
+    currentAudio    = new Audio(URL.createObjectURL(blob));
+    currentPlayBtn  = playBtn;
+    currentStopBtn  = stopBtn;
+    playBtn.innerHTML = "🔊 En cours…";
+    playBtn.classList.add("playing");
+    stopBtn.disabled = false;
+    currentAudio.onended = stopAudio;
+    currentAudio.play();
+  } catch {
+    playBtn.innerHTML = "🔊 Écouter";
+    playBtn.disabled  = false;
+  }
+}
+
+// ---------------------------------------------------------------
+// MESSAGE HELPERS
+// ---------------------------------------------------------------
 function addTyping() {
   const row = document.createElement("div");
   row.className = "msg-row bot fade-in";
@@ -583,246 +395,350 @@ function removeTyping() {
   if (t) t.remove();
 }
 
+function addTTSControls(row, getTextFn) {
+  const controls = document.createElement("div");
+  controls.className = "tts-controls";
+
+  const playBtn = document.createElement("button");
+  playBtn.className = "tts-btn";
+  playBtn.innerHTML = "🔊 Écouter";
+  playBtn.onclick   = () => playTTS(getTextFn(), playBtn, stopBtn);
+
+  const stopBtn = document.createElement("button");
+  stopBtn.className = "tts-btn";
+  stopBtn.innerHTML = "⏹ Stop";
+  stopBtn.disabled  = true;
+  stopBtn.onclick   = stopAudio;
+
+  controls.appendChild(playBtn);
+  controls.appendChild(stopBtn);
+  row.appendChild(controls);
+  return { playBtn, stopBtn };
+}
+
+/** Add a plain text bot message (supports streaming — pass empty string first, then append). */
+function addTextMessage(text) {
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const msg = document.createElement("div");
+  msg.className = "msg bot";
+  msg.textContent = text;
+  row.appendChild(msg);
+
+  const { playBtn } = addTTSControls(row, () => msg.textContent);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+  return { msg, playBtn };
+}
+
+/** Add a user message bubble. */
+function addUserMessage(text) {
+  const row = document.createElement("div");
+  row.className = "msg-row user fade-in";
+  const msg = document.createElement("div");
+  msg.className = "msg user";
+  msg.textContent = text;
+  row.appendChild(msg);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+// ---------------------------------------------------------------
+// AGENT CARD RENDERERS  (data → DOM, no HTML strings from backend)
+// ---------------------------------------------------------------
+
+function renderVetCard(data) {
+  const ar = currentLang === "ar";
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const card = document.createElement("div");
+  card.className = "agent-card vet-card";
+
+  if (!data.found || !data.best) {
+    card.innerHTML = `<p class="card-title">${ar ? "لم يتم العثور على طبيب بيطري" : "❌ Aucun vétérinaire trouvé"}</p>
+      <p style="font-size:13px;color:var(--muted)">${ar ? "حاول Google Maps أو وسّع نطاق البحث." : "Essayez Google Maps ou augmentez la zone de recherche."}</p>`;
+  } else {
+    const { name, distance_km, phone, map_url } = data.best;
+    const warningHtml = data.warning
+      ? `<p class="vet-warning">⚠️ ${data.warning}</p>` : "";
+    const phoneHtml = phone
+      ? `<p class="vet-phone">📞 ${phone}</p>`
+      : `<p class="vet-phone">📞 ${ar ? "الهاتف غير متوفر" : "Téléphone non disponible"}</p>`;
+
+    let othersHtml = "";
+    if (data.others && data.others.length > 0) {
+      const items = data.others.map(v =>
+        `<li><a href="${v.map_url}" target="_blank" style="color:var(--green)">${v.name}</a> — ${v.distance_km} km</li>`
+      ).join("");
+      othersHtml = `<div class="vet-others"><p>🔹 ${ar ? "خيارات أخرى" : "Autres options"}</p><ul>${items}</ul></div>`;
+    }
+
+    card.innerHTML = `
+      ${warningHtml}
+      <p class="card-title">🐄 ${ar ? "الطبيب البيطري الموصى به" : "Vétérinaire recommandé"}</p>
+      <p class="vet-name">📍 ${name} — <span class="vet-dist">${distance_km} km</span></p>
+      ${phoneHtml}
+      <a href="${map_url}" target="_blank" class="map-btn">📍 ${ar ? "عرض على خرائط Google" : "Voir sur Google Maps"}</a>
+      ${othersHtml}`;
+  }
+
+  row.appendChild(card);
+  const ttsText = () => card.textContent;
+  addTTSControls(row, ttsText);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function renderMeteoCard(data) {
+  const ar = currentLang === "ar";
+  const row  = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const { decision, temp, rain, wind, is_day, next_3h_rain_pct, reason, tip } = data;
+
+  const configs = {
+    out: {
+      color:   "#2d6a4f",
+      header:  ar ? "🌤️ الطقس مناسب"       : "🌤️ Conditions favorables",
+      verdict: ar ? "✅ يمكن إخراج الأبقار" : "✅ Les vaches peuvent sortir",
+    },
+    in: {
+      color:   "#c0392b",
+      header:  is_day ? (ar ? "🌧️ الطقس غير مناسب"  : "🌧️ Conditions défavorables")
+                       : (ar ? "🌙 وقت الليل"        : "🌙 C'est la nuit"),
+      verdict: is_day ? (ar ? "❌ أبقِ الأبقار في الداخل" : "❌ Gardez les vaches à l'intérieur")
+                       : (ar ? "❌ الأبقار تبقى في الداخل" : "❌ Les vaches restent à l'intérieur"),
+    },
+    limited: {
+      color:   "#e67e22",
+      header:  ar ? "⚠️ خروج محدود"               : "⚠️ Sortie limitée",
+      verdict: ar ? "⚠️ الخروج صباحاً أو مساءً فقط" : "⚠️ Sortir tôt matin / soir uniquement",
+    },
+  };
+
+  const cfg       = configs[decision] || configs.out;
+  const timeLabel = is_day ? "☀️ Jour" : "🌙 Nuit";
+  const rainWarn  = next_3h_rain_pct > 60
+    ? `<p class="meteo-rain">🌂 ${ar ? `احتمال مطر خلال 3 ساعات (${next_3h_rain_pct}%)` : `Pluie probable dans 3h (${next_3h_rain_pct}%)`}</p>`
+    : "";
+
+  const card = document.createElement("div");
+  card.className = "agent-card meteo-card";
+  card.style.borderColor = cfg.color;
+  card.innerHTML = `
+    <p class="meteo-header">${cfg.header}</p>
+    <p class="meteo-verdict" style="color:${cfg.color}">${cfg.verdict}</p>
+    <p class="meteo-stats">🌡️ ${temp}°C &nbsp;|&nbsp; 🌧️ ${rain}mm &nbsp;|&nbsp; 💨 ${wind} km/h &nbsp;|&nbsp; ${timeLabel}</p>
+    ${rainWarn}
+    <p class="meteo-reason">• ${reason}</p>
+    <p class="meteo-tip">👉 ${tip}</p>`;
+
+  row.appendChild(card);
+  addTTSControls(row, () => card.textContent);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function renderFeedCard(data) {
+  const ar = currentLang === "ar";
+  const row  = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const { season, temp, is_day, main_feed, supplement, water, warning, tip } = data;
+  const seasonEmoji = { hiver:"❄️", printemps:"🌱", été:"☀️", automne:"🍂" }[season] || "🌿";
+  const timeLabel   = is_day ? (ar ? "صباح" : "matin") : (ar ? "مساء/ليل" : "soir/nuit");
+
+  const labels = ar
+    ? { title:"توصيات التغذية اليوم", main:"🌾 العلف الأساسي", supp:"💊 المكملات", water:"💧 الماء", tip:"👉 نصيحة" }
+    : { title:"Alimentation recommandée aujourd'hui", main:"🌾 Fourrage principal", supp:"💊 Compléments", water:"💧 Eau", tip:"👉 Conseil" };
+
+  const warningHtml = warning
+    ? `<p class="feed-warning">⚠️ ${warning}</p>` : "";
+
+  const card = document.createElement("div");
+  card.className = "agent-card feed-card";
+  card.innerHTML = `
+    <p class="feed-title">${seasonEmoji} ${labels.title}</p>
+    <p class="feed-stats">🌡️ ${temp}°C &nbsp;|&nbsp; ${seasonEmoji} ${season} &nbsp;|&nbsp; 🕐 ${timeLabel}</p>
+    <div class="feed-row"><span class="feed-label">${labels.main}</span><span>${main_feed}</span></div>
+    <div class="feed-row"><span class="feed-label">${labels.supp}</span><span>${supplement}</span></div>
+    <div class="feed-row"><span class="feed-label">${labels.water}</span><span>${water}</span></div>
+    ${warningHtml}
+    <p class="feed-tip">${labels.tip} ${tip}</p>`;
+
+  row.appendChild(card);
+  addTTSControls(row, () => card.textContent);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+const AGENT_RENDERERS = { vet: renderVetCard, meteo: renderMeteoCard, feed: renderFeedCard };
+
+// ---------------------------------------------------------------
+// SEND MESSAGE — handles both JSON (agents) and streaming text
+// ---------------------------------------------------------------
 async function sendMessage(customText = null) {
   const text = customText || input.value.trim();
   if (!text) return;
   if (!customText) input.value = "";
 
-  addMsg(text, "user");
+  addUserMessage(text);
   addTyping();
 
   try {
-    
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-      message: text,
-      session_id: sessionId,
-      lang: currentLang,
-      lat: userLocation.lat,
-      lon: userLocation.lon
-    })
+        message:    text,
+        session_id: sessionId,
+        lang:       currentLang,
+        lat:        userLocation.lat,
+        lon:        userLocation.lon,
+      }),
     });
 
+    removeTyping();
+
     if (!res.ok) {
-      removeTyping();
-      addMsg("❌ Server error", "bot");
+      // Try to parse error JSON
+      try {
+        const err = await res.json();
+        addTextMessage(`❌ ${err.error?.message || "Erreur serveur"}`);
+      } catch {
+        addTextMessage("❌ Erreur serveur");
+      }
       return;
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
+    const contentType = res.headers.get("Content-Type") || "";
 
-    let botMsg = null;
-    let playBtn = null;
-    let stopBtn = null;
+    // ── JSON response (agent card or text response from language gate / errors)
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+
+      if (data.type === "agent" && AGENT_RENDERERS[data.agent]) {
+        AGENT_RENDERERS[data.agent](data.data);
+        return;
+      }
+
+      if (data.type === "text") {
+        addTextMessage(data.content || "");
+        return;
+      }
+
+      // Fallback: render whatever came back
+      addTextMessage(JSON.stringify(data));
+      return;
+    }
+
+    // ── Streaming text response (normal LLM answer)
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    const { msg, playBtn } = addTextMessage("");
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-
-      const chunkText = decoder.decode(value, { stream: true });
-
-      if (!botMsg) {
-        removeTyping();
-        const created = addMsg("", "bot");
-        botMsg = created.msg;
-        playBtn = created.playBtn;
-        stopBtn = created.stopBtn;
-      }
-
-      botMsg.innerHTML += chunkText.replace(/\n/g, "<br>");
+      msg.textContent += decoder.decode(value, { stream: true });
       chatbox.scrollTop = chatbox.scrollHeight;
     }
 
-    if (playBtn) playBtn.disabled = false;
+    playBtn.disabled = false;
 
   } catch (err) {
     console.error(err);
     removeTyping();
-    addMsg("❌ Network error", "bot");
-  }
-}
-
-function stopAudio() {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio = null;
-  }
-  if (currentPlayBtn) {
-    currentPlayBtn.innerHTML = "🔊 Écouter";
-    currentPlayBtn.classList.remove("playing");
-    currentPlayBtn.disabled = false;
-  }
-  if (currentStopBtn) {
-    currentStopBtn.disabled = true;
-  }
-  currentPlayBtn = null;
-  currentStopBtn = null;
-}
-
-async function playTTS(text, playBtn, stopBtn) {
-  stopAudio();
-
-  try {
-    playBtn.innerHTML = "⏳ Chargement…";
-    playBtn.disabled = true;
-
-    const res = await fetch("http://127.0.0.1:8000/chatbot/tts/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-      text: text,
-      lang: currentLang
-    })
-    });
-
-    const blob = await res.blob();
-    const audioUrl = URL.createObjectURL(blob);
-
-    currentAudio = new Audio(audioUrl);
-    currentPlayBtn = playBtn;
-    currentStopBtn = stopBtn;
-
-    playBtn.innerHTML = "🔊 En cours…";
-    playBtn.classList.add("playing");
-    stopBtn.disabled = false;
-
-    currentAudio.onended = () => stopAudio();
-    currentAudio.play();
-
-  } catch (err) {
-    console.error(err);
-    playBtn.innerHTML = "🔊 Écouter";
-    playBtn.disabled = false;
-    alert("Erreur audio");
+    addTextMessage("❌ Erreur réseau");
   }
 }
 
 sendBtn.onclick = () => sendMessage();
 input.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    e.preventDefault(); 
-    sendMessage();
-  }
+  if (e.key === "Enter") { e.preventDefault(); sendMessage(); }
 });
 
-// MICRO
-let mediaRecorder;
-let audioChunks = [];
-let isRecording = false;
+// ---------------------------------------------------------------
+// MICROPHONE (STT)
+// ---------------------------------------------------------------
+let mediaRecorder, audioChunks = [], isRecording = false;
 
 micBtn.onclick = async () => {
   if (!isRecording) {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-    });
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+    } catch {
+      input.placeholder = currentLang === "ar"
+        ? "⚠️ لا يمكن الوصول إلى الميكروفون"
+        : "⚠️ Microphone inaccessible";
+      setTimeout(() => { input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…"; }, 3000);
+      return;
+    }
 
     mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data && event.data.size > 0) audioChunks.push(event.data);
-    };
+    audioChunks   = [];
+    mediaRecorder.ondataavailable = e => { if (e.data?.size > 0) audioChunks.push(e.data); };
 
     mediaRecorder.onstop = async () => {
       stream.getTracks().forEach(t => t.stop());
-
-      const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+      const blob     = new Blob(audioChunks, { type: mediaRecorder.mimeType });
       const formData = new FormData();
-      formData.append("audio", audioBlob, "audio.webm");
-      formData.append("lang", currentLang);
+      formData.append("audio", blob, "audio.webm");
+      formData.append("lang",  currentLang);
 
       try {
-        const res = await fetch("http://127.0.0.1:8000/chatbot/stt/", {
-          method: "POST",
-          body: formData
-        });
-
+        const res  = await fetch(STT_URL, { method: "POST", body: formData });
         const data = await res.json();
-        console.log("STT reçu:", data);
 
-        if (data.status === "incomprehensible") {
-          // 🔥 Message discret dans le placeholder, pas d'alert
+        if (data.status === "incomprehensible" || !data.text?.trim()) {
           input.placeholder = currentLang === "ar"
             ? "⚠️ صوت غير مفهوم، حاول مجدداً..."
             : "⚠️ Audio incompréhensible, réessayez...";
-
-          // Remettre le placeholder normal après 3 secondes
           setTimeout(() => {
-            input.placeholder = currentLang === "ar"
-              ? "اكتب سؤالك..."
-              : "Posez votre question…";
+            input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
           }, 3000);
-
-        } else if (data.text && data.text.trim() !== "") {
+        } else {
           input.value = data.text;
           input.focus();
         }
-
-      } catch (err) {
-        console.error(err);
-        input.placeholder = currentLang === "ar"
-          ? "⚠️ خطأ، حاول مجدداً..."
-          : "⚠️ Erreur réseau, réessayez...";
+      } catch {
+        input.placeholder = currentLang === "ar" ? "⚠️ خطأ" : "⚠️ Erreur réseau";
         setTimeout(() => {
-          input.placeholder = currentLang === "ar"
-            ? "اكتب سؤالك..."
-            : "Posez votre question…";
+          input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
         }, 3000);
       }
     };
 
     mediaRecorder.start(1000);
-    isRecording = true;
+    isRecording       = true;
     micBtn.textContent = "⏹";
     micBtn.classList.add("recording");
-    micBtn.title = "Arrêter";
-
   } else {
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
-    }
-    isRecording = false;
+    if (mediaRecorder?.state !== "inactive") mediaRecorder.stop();
+    isRecording        = false;
     micBtn.textContent = "🎤";
     micBtn.classList.remove("recording");
-    micBtn.title = "Microphone";
   }
 };
 
-function getLocation() {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve({ lat: null, lon: null });
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        console.log("✅ RAW POSITION:", pos); 
-
-        resolve({
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude
-        });
-      },
-      (err) => {
-        console.error("Location error:", err);
-        resolve({ lat: null, lon: null });
-      },
-      {
-        enableHighAccuracy: true,  
-        timeout: 10000,
-        maximumAge: 0               
-      }
-    );
-  });
-}
+// ---------------------------------------------------------------
+// GEOLOCATION
+// ---------------------------------------------------------------
 window.onload = async () => {
-  userLocation = await getLocation();
-  console.log("📍 Location:", userLocation);
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      console.log("📍 Location:", userLocation);
+    },
+    err => console.warn("Location denied:", err.message),
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+  );
 };
 </script>
 </body>

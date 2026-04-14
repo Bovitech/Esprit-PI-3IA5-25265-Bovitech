@@ -1,5 +1,7 @@
 import logging
+
 import requests
+
 from chatbot.utils.geo import haversine
 from .base import BaseAgent
 
@@ -11,43 +13,47 @@ SEARCH_RADII = [5000, 10000, 20000]
 
 class VetAgent(BaseAgent):
 
-    def run(self, lat: float | None, lon: float | None, lang: str) -> str:
+    def run(self, lat: float | None, lon: float | None, lang: str) -> dict:
         if lat is None or lon is None:
-            return (
-                "📍 يرجى تفعيل الموقع الجغرافي للعثور على طبيب بيطري قريب"
-                if lang == "ar"
-                else "📍 Veuillez activer la localisation pour trouver un vétérinaire proche"
-            )
-        return self._find_vets(lat, lon, lang)
+            return {
+                "found": False,
+                "best": None,
+                "others": [],
+                "warning": (
+                    "يرجى تفعيل الموقع الجغرافي للعثور على طبيب بيطري قريب"
+                    if lang == "ar"
+                    else "Veuillez activer la localisation pour trouver un vétérinaire proche"
+                ),
+            }
+        return self._find_vets(lat, lon)
 
-    def _find_vets(self, lat: float, lon: float, lang: str) -> str:
+    def _find_vets(self, lat: float, lon: float) -> dict:
         vets = []
 
         for radius in SEARCH_RADII:
             query = f"""
             [out:json][timeout:25];
-            (
             node["amenity"="veterinary"](around:{radius},{lat},{lon});
-            way["amenity"="veterinary"](around:{radius},{lat},{lon});
-            );
-            out center;
+            out;
             """
             try:
                 res = requests.post(
                     OVERPASS_URL,
-                    data={"data": query},  # Correct Overpass POST format
+                    data={"data": query},
                     timeout=30,
                     headers={"Accept": "application/json"},
                 )
                 res.raise_for_status()
-                
-                # Guard against empty or HTML response
+
                 content = res.text.strip()
                 if not content or content.startswith("<"):
-                    logger.warning("Overpass returned non-JSON (radius=%d), retrying...", radius)
+                    logger.warning(
+                        "Overpass non-JSON response (radius=%d)", radius
+                    )
                     continue
-                    
+
                 data = res.json()
+
             except requests.exceptions.Timeout:
                 logger.warning("Overpass timeout (radius=%d)", radius)
                 continue
@@ -62,42 +68,42 @@ class VetAgent(BaseAgent):
                 if vlat is None or vlon is None:
                     continue
                 vets.append({
-                    "name":     tags.get("name", "Vétérinaire"),
-                    "phone":    tags.get("phone"),
-                    "lat":      vlat,
-                    "lon":      vlon,
-                    "distance": round(haversine(lat, lon, vlat, vlon), 2),
+                    "name":        tags.get("name", "Vétérinaire"),
+                    "phone":       tags.get("phone"),
+                    "lat":         vlat,
+                    "lon":         vlon,
+                    "distance_km": round(haversine(lat, lon, vlat, vlon), 2),
                 })
 
             if vets:
                 break
 
         if not vets:
-            return """<div class="vet-card" style="border-color:#e67e22">
-        <p>⚠️ <strong>Aucun vétérinaire trouvé via OpenStreetMap</strong></p>
-        <p>Les données peuvent être incomplètes dans votre région.</p>
-        <p>👉 Essayez <a href="https://www.google.com/maps/search/vétérinaire" target="_blank" class="map-btn">Google Maps</a></p>
-        </div>"""
+            return {"found": False, "best": None, "others": [], "warning": None}
 
-        vets.sort(key=lambda v: v["distance"])
+        vets.sort(key=lambda v: v["distance_km"])
         best   = vets[0]
         others = vets[1:3]
 
-        def map_link(v: dict) -> str:
+        def map_url(v: dict) -> str:
             return f"https://www.google.com/maps/search/?api=1&query={v['lat']},{v['lon']}"
 
-        warning    = "<p>⚠️ Vétérinaire le plus proche (>10 km) :</p>" if best["distance"] > 10 else ""
-        phone_html = f"<p>📞 {best['phone']}</p>" if best["phone"] else "<p>📞 Téléphone non disponible</p>"
-        others_html = ""
-        if others:
-            items       = "".join(f"<li>{v['name']} — {v['distance']} km</li>" for v in others)
-            others_html = f"<p><strong>🔹 Autres options :</strong></p><ul>{items}</ul>"
+        logger.info(
+            "action=vet_search found=%d best=%s dist=%.1fkm",
+            len(vets), best["name"], best["distance_km"]
+        )
 
-        return f"""{warning}
-<div class="vet-card">
-  <p>🐄 <strong>Vétérinaire recommandé</strong></p>
-  <p>📍 <strong>{best['name']}</strong> — {best['distance']} km</p>
-  {phone_html}
-  <a href="{map_link(best)}" target="_blank" class="map-btn">📍 Voir sur Google Maps</a>
-</div>
-{others_html}"""
+        return {
+            "found": True,
+            "best": {
+                "name":        best["name"],
+                "distance_km": best["distance_km"],
+                "phone":       best.get("phone"),
+                "map_url":     map_url(best),
+            },
+            "others": [
+                {"name": v["name"], "distance_km": v["distance_km"], "map_url": map_url(v)}
+                for v in others
+            ],
+            "warning": "Vétérinaire éloigné (>10 km)" if best["distance_km"] > 10 else None,
+        }
