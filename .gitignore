@@ -31,3 +31,4 @@ backend/qdrant_data/
 # RAG
 backend/knowledge_base/rag_chunks.json*.webm
 *.wav
+qdrant_data/

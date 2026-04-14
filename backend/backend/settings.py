@@ -129,3 +129,42 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+# ---------------------------------------------------------------
+# ADD THESE LINES to your existing backend/settings.py
+# ---------------------------------------------------------------
+
+# Piper TTS paths — change these per environment
+# In production, set them via environment variables instead
+PIPER_PATH     = os.getenv("PIPER_PATH",     r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\piper.exe")
+PIPER_MODEL_FR = os.getenv("PIPER_MODEL_FR", r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\fr_FR-upmc-medium.onnx")
+PIPER_MODEL_AR = os.getenv("PIPER_MODEL_AR", r"C:\Users\zeine\Downloads\piper_windows_amd64\piper\ar_JO-kareem-medium.onnx")
+
+# Logging — so you can actually see what's happening
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {message}",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        }
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "chatbot": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        }
+    },
+}
