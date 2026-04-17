@@ -121,6 +121,22 @@ KNOWLEDGE_BASE_DIR = BASE_DIR / "knowledge_base"
 QDRANT_PATH        = BASE_DIR / "qdrant_data"
 
 # ------------------------------------------------------------------
+# SKIN DISEASE MODEL
+# ------------------------------------------------------------------
+SKIN_MODEL_PATH = BASE_DIR / "models" / "best_model.pth"
+ 
+# Validation au démarrage
+if not SKIN_MODEL_PATH.exists():
+    import warnings
+    warnings.warn(
+        f"SKIN_MODEL_PATH not found at {SKIN_MODEL_PATH}. "
+        "Skin disease classification will fail at runtime. "
+        "Place best_model.pth in bovitech_chatbot/models/",
+        RuntimeWarning,
+        stacklevel=2,
+    )
+
+# ------------------------------------------------------------------
 # LOGGING
 # ------------------------------------------------------------------
 LOGGING = {

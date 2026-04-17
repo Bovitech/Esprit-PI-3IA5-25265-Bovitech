@@ -1,28 +1,17 @@
 """
 views.py — HTTP boundary only.
 
-Response contracts (documented here so the frontend team knows what to expect):
+Endpoints:
+  POST /chatbot/          → chat (agent JSON | text JSON | streaming text)
+  POST /chatbot/stt/      → speech-to-text
+  POST /chatbot/tts/      → text-to-speech
+  POST /chatbot/skin/     → image skin disease classification  ← NEW
 
-  POST /chatbot/
-    agent answer   → 200 JsonResponse  {"type":"agent",  "agent":"vet|meteo|feed", "data":{...}}
-    text answer    → 200 JsonResponse  {"type":"text",   "content":"..."}          (language gate)
-    streamed text  → 200 StreamingHttpResponse  text/plain                         (normal LLM)
-    error          → 4xx JsonResponse  {"error":{"code":"...","message":"..."}}
-
-  POST /chatbot/stt/
-    success        → 200 {"text": str, "status": "ok"}
-    noise/invalid  → 200 {"text": "",  "status": "incomprehensible"}
-    error          → 4xx {"error": {"code": str, "message": str}}
-
-  POST /chatbot/tts/
-    success        → 200 audio/wav stream
-    error          → 4xx/5xx {"error": {"code": str, "message": str}}
-
-NOTE on mixed response style (/chatbot/):
-  Agent answers return JSON immediately (small payload, no need to stream).
-  Normal LLM answers are streamed token-by-token for better UX.
-  This is intentional and documented above. The frontend checks Content-Type
-  to decide which path to take.
+Response contracts:
+  agent   → {"type":"agent",  "agent":"vet|meteo|feed|skin", "data":{...}}
+  text    → {"type":"text",   "content":"..."}
+  stream  → text/plain streaming
+  error   → {"error":{"code":"...", "message":"..."}}
 """
 import json
 import logging
@@ -33,13 +22,13 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-# Single import point for all response helpers — no inline dict building
 from chatbot.contracts import agent_response, make_error, text_response
 from chatbot.models import Conversation
 from chatbot.services import memory, retrieval, router
 from chatbot.services.agents.feed import FeedAgent
 from chatbot.services.agents.llm_agent import stream as llm_stream
 from chatbot.services.agents.meteo import MeteoAgent
+from chatbot.services.agents.skin import SkinAgent
 from chatbot.services.agents.vet import VetAgent
 from chatbot.stt.corrector import correct as stt_correct
 from chatbot.stt.transcriber import transcribe
@@ -48,10 +37,10 @@ from chatbot.utils.text import clean_text, is_arabic, is_valid_text
 
 logger = logging.getLogger(__name__)
 
-# Agent singletons
 _vet_agent   = VetAgent()
 _meteo_agent = MeteoAgent()
 _feed_agent  = FeedAgent()
+_skin_agent  = SkinAgent()
 
 AGENT_MAP = {
     "vet_agent":   ("vet",   _vet_agent),
@@ -59,7 +48,6 @@ AGENT_MAP = {
     "feed_agent":  ("feed",  _feed_agent),
 }
 
-# Location is required for vet and meteo — not for feed
 LOCATION_REQUIRED = {"vet", "meteo"}
 
 NO_LOCATION_MSG = {
@@ -68,6 +56,9 @@ NO_LOCATION_MSG = {
     "meteo": {"fr": "Veuillez activer la localisation pour obtenir la météo.",
               "ar": "يرجى تفعيل الموقع الجغرافي للحصول على توقعات الطقس."},
 }
+
+# Max image size accepted: 10 MB
+MAX_IMAGE_BYTES = 10 * 1024 * 1024
 
 
 def frontend(request):
@@ -97,30 +88,21 @@ def chat(request):
     if not isinstance(message, str) or not message.strip():
         return make_error("EMPTY_MESSAGE", "Message must be a non-empty string.")
 
-    # Language gate — returns JSON text_response, not an error
     if lang == "fr" and is_arabic(message):
-        return JsonResponse(
-            text_response("Veuillez écrire en français 🇫🇷 ou changez la langue")
-        )
+        return JsonResponse(text_response("Veuillez écrire en français 🇫🇷 ou changez la langue"))
     if lang == "ar" and not is_arabic(message):
-        return JsonResponse(
-            text_response("يرجى الكتابة باللغة العربية 🇸🇦 أو تغيير اللغة")
-        )
+        return JsonResponse(text_response("يرجى الكتابة باللغة العربية 🇸🇦 أو تغيير اللغة"))
 
     Conversation.objects.create(session_id=session_id, role="user", message=message)
     history = memory.get_history(session_id, lang)
-
     chunks  = retrieval.search(message)
     context = "\n\n".join(chunks)
-    logger.debug(
-        "session=%s retrieval_hits=%d query=%r",
-        session_id, len(chunks), message[:60],
-    )
+
+    logger.debug("session=%s retrieval_hits=%d query=%r", session_id, len(chunks), message[:60])
 
     action = router.decide(message, history, lang)
     logger.info("session=%s action=%s lang=%s", session_id, action, lang)
 
-    # Agent path → JSON
     if action in AGENT_MAP:
         agent_key, agent_obj = AGENT_MAP[action]
         lat_f = float(lat) if lat is not None else None
@@ -130,8 +112,6 @@ def chat(request):
             return JsonResponse(text_response(NO_LOCATION_MSG[agent_key][lang]))
 
         data = agent_obj.run(lat_f, lon_f, lang)
-
-        # MeteoAgent returns None on weather-fetch failure
         if data is None:
             msg = ("تعذّر الحصول على بيانات الطقس." if lang == "ar"
                    else "Impossible de récupérer la météo en ce moment.")
@@ -141,17 +121,69 @@ def chat(request):
         logger.info("session=%s action=%s latency_ms=%.0f", session_id, action, elapsed)
         return JsonResponse(agent_response(agent_key, data))
 
-    # LLM streaming path
     def _generate():
         full = yield from llm_stream(message, context, history, lang)
         memory.save_assistant_message(session_id, full)
         elapsed = (time.monotonic() - t_start) * 1000
-        logger.info(
-            "session=%s action=answer latency_ms=%.0f tokens=%d",
-            session_id, elapsed, len(full),
-        )
+        logger.info("session=%s action=answer latency_ms=%.0f tokens=%d", session_id, elapsed, len(full))
 
     return StreamingHttpResponse(_generate(), content_type="text/plain")
+
+
+# ------------------------------------------------------------------
+# SKIN — image disease classification  ← NEW
+# ------------------------------------------------------------------
+@csrf_exempt
+@require_http_methods(["POST"])
+def skin(request):
+    """
+    Reçoit une image (multipart/form-data, champ "image") et retourne
+    le résultat de classification EfficientNet-B3.
+
+    Réponse succès :
+      {"type":"agent","agent":"skin","data":{
+        "predicted_class":"Lumpy",
+        "confidence":0.923,
+        "probabilities":{...},
+        "level":"high",
+        "is_healthy":false,
+        "description":"..."
+      }}
+    """
+    t_start = time.monotonic()
+
+    lang_raw = request.POST.get("lang", "fr")
+    lang     = lang_raw if lang_raw in ("fr", "ar") else "fr"
+
+    image_file = request.FILES.get("image")
+    if not image_file:
+        return make_error("NO_IMAGE", "No image file provided. Send the image in the 'image' field.")
+
+    if image_file.size > MAX_IMAGE_BYTES:
+        return make_error("IMAGE_TOO_LARGE", "Image must be under 10 MB.")
+
+    # Validate content type quickly
+    content_type = image_file.content_type or ""
+    if not content_type.startswith("image/"):
+        return make_error("INVALID_IMAGE_TYPE", "File must be an image (jpeg, png, webp...).")
+
+    image_bytes = b"".join(image_file.chunks())
+
+    data = _skin_agent.run(image_bytes, lang)
+
+    if data is None:
+        msg = ("تعذّر قراءة الصورة. تأكد من أنها واضحة وبصيغة صحيحة."
+               if lang == "ar"
+               else "Impossible de lire l'image. Assurez-vous qu'elle est nette et dans un format valide (jpg, png).")
+        return JsonResponse(text_response(msg))
+
+    elapsed = (time.monotonic() - t_start) * 1000
+    logger.info(
+        "action=skin predicted=%s confidence=%.3f latency_ms=%.0f",
+        data["predicted_class"], data["confidence"], elapsed,
+    )
+
+    return JsonResponse(agent_response("skin", data))
 
 
 # ------------------------------------------------------------------
