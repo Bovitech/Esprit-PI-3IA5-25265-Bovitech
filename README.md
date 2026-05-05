@@ -8,37 +8,29 @@ Transforming raw farm signals into actionable insights through multimodal data s
 
 ---
 ## Requirements :
-# Core
+
+Python >= 3.9
 numpy
 pandas
 scikit-learn
 scipy
-
-# Deep Learning
-tensorflow>=2.10
+tensorflow >= 2.10
 keras
-
-# Audio Processing
 librosa
 soundfile
-
-# Machine Learning
 xgboost
-
-# Backend
 fastapi
 uvicorn
-
-# Data / Database
 supabase
-
-# Utilities
 matplotlib
 tqdm
 joblib
-
-# Explainability
 shap
+
+System dependencies :
+
+FFmpeg
+libsndfile
 ##  Overview
 
 Bovitech is a comprehensive cow-tech ecosystem designed to modernize livestock management through multimodal data science and intelligent automation. It combines IoT wearable sensors with machine learning to analyze animal health, behavior, and environment.
