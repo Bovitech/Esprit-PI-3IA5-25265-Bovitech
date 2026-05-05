@@ -186,7 +186,3 @@ Do not commit large generated logs, virtual environments, or temporary caches.
 | Run the app | `src/illness/`, `artifacts/illness_model/illness_ppo.zip` |
 | Retrain the model | `src/illness/train_illness_rl.py`, `src/illness/illness_rl_env.py`, `src/illness/illness_labels.py`, INRAE CSV data |
 
-## Final Note
-
-If you share only one README with the team, share this one.
-It is the summary of the illness feature, the runtime code, the training flow, the files to keep, and the integration expectations.
