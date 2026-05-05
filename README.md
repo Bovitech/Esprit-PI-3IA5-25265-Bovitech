@@ -7,29 +7,31 @@ Transforming raw farm signals into actionable insights through multimodal data s
 </div>
 
 ---
-## Requirements :
-Python >= 3.9
-numpy
-pandas
-scikit-learn
-scipy
-tensorflow >= 2.10
-keras
-librosa
-soundfile
-xgboost
-fastapi
-uvicorn
-supabase
-matplotlib
-tqdm
-joblib
-shap
+## Requirements
 
-System dependencies :
+requirements:
 
-FFmpeg
-libsndfile
+- Python >= 3.9  
+- numpy  
+- pandas  
+- scikit-learn  
+- scipy  
+- tensorflow >= 2.10  
+- keras  
+- librosa  
+- soundfile  
+- xgboost  
+- fastapi  
+- uvicorn  
+- supabase  
+- matplotlib  
+- tqdm  
+- joblib  
+- shap  
+
+System dependencies:
+- FFmpeg  
+- libsndfile  
 
 ---
 ##  Overview
