@@ -8,34 +8,34 @@ Transforming raw farm signals into actionable insights through multimodal data s
 
 ---
 
-## 📖 Overview
+##  Overview
 
 Bovitech is a comprehensive cow-tech ecosystem designed to modernize livestock management through multimodal data science and intelligent automation. It combines IoT wearable sensors with machine learning to analyze animal health, behavior, and environment.
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 | Feature | Description |
 |--------|-------------|
-| 🎙️ Intention Classification | Real-time analysis of bovine vocalizations |
-| 🏃 Behavioral Monitoring | Tracking standing, walking, feeding, lying |
-| 📍 Geospatial Tracking | GPS-based movement & anomaly detection |
-| 🚨 Health Alerts | Early warning for stress & disease |
-| 🤖 Multimodal Chatbot | Text, voice, and image-based diagnosis |
+|  Intention Classification | Real-time analysis of bovine vocalizations |
+|  Behavioral Monitoring | Tracking standing, walking, feeding, lying |
+|  Geospatial Tracking | GPS-based movement & anomaly detection |
+|  Health Alerts | Early warning for stress & disease |
+|  Multimodal Chatbot | Text, voice, and image-based diagnosis |
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
-### 🧠 AI / Data Science
+###  AI / Data Science
 - CNN (Audio spectrograms)
 - BiLSTM (time-series)
 - XGBoost (regression)
 - Librosa (audio processing)
 - SHAP (explainability)
 
-### ☁️ Backend
+###  Backend
 - Python 3.9+
 - FastAPI
 - Supabase
@@ -43,8 +43,8 @@ Bovitech is a comprehensive cow-tech ecosystem designed to modernize livestock m
 
 ---
 
-## ⚙️ System Architecture
+##  System Architecture
 
-### 🔊 Acoustic Classification
+###  Acoustic Classification
 ```text
 .wav audio → Mel Spectrogram → CNN → Classification
