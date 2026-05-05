@@ -1,15 +1,38 @@
-<div align="center">
+# Bovitech: Multimodal Smart Cattle Monitoring System
 
-# 🐄 Bovitech  
-### AI-Powered Smart Cattle Management System  
-Transforming raw farm signals into actionable insights through multimodal data science  
-
-</div>
+This repository contains a multimodal machine learning system for intelligent cattle monitoring, combining audio, sensor, and environmental data to model behavior, stress, and productivity in livestock.
 
 ---
-## Requirements
 
-requirements:
+## Overview
+
+Bovitech is designed to modernize livestock monitoring by integrating wearable IoT sensor data, acoustic analysis, and environmental features into a unified machine learning pipeline.
+
+The system focuses on:
+
+- Behavioral activity recognition from IMU sensor data  
+- Acoustic classification of bovine vocalizations  
+- Stress prediction using multimodal time-series modeling  
+- Milk yield prediction using historical and sensor-derived features  
+- Geospatial movement analysis for anomaly detection  
+
+The project combines classical machine learning and deep learning models depending on the data modality.
+
+---
+
+## Features
+
+- Behavioral activity recognition from wearable IMU sensor data  
+- Acoustic classification using CNNs on Mel spectrograms  
+- Stress detection using multimodal time-series deep learning models  
+- Milk yield prediction using gradient boosting regression  
+- Geospatial tracking and movement pattern analysis  
+- Multimodal fusion of environmental and physiological signals  
+- Feature engineering from raw sensor streams and temporal aggregation  
+
+---
+
+## Requirements
 
 - Python >= 3.9  
 - numpy  
@@ -28,49 +51,21 @@ requirements:
 - tqdm  
 - joblib  
 - shap  
-
-System dependencies:
-- FFmpeg  
+- ffmpeg  
 - libsndfile  
 
 ---
-##  Overview
 
-Bovitech is a comprehensive cow-tech ecosystem designed to modernize livestock management through multimodal data science and intelligent automation. It combines IoT wearable sensors with machine learning to analyze animal health, behavior, and environment.
+## Installation
 
----
+```bash
+git clone https://github.com/yourusername/bovitech.git
+cd bovitech
 
-##  Key Features
+python -m venv .venv
 
-| Feature | Description |
-|--------|-------------|
-|  Intention Classification | Real-time analysis of bovine vocalizations |
-|  Behavioral Monitoring | Tracking standing, walking, feeding, lying |
-|  Geospatial Tracking | GPS-based movement & anomaly detection |
-|  Health Alerts | Early warning for stress & disease |
-|  Multimodal Chatbot | Text, voice, and image-based diagnosis |
+# Activate environment
+source .venv/bin/activate   # Linux / macOS
+.venv\Scripts\activate      # Windows
 
----
-
-##  Tech Stack
-
-###  AI / Data Science
-- CNN (Audio spectrograms)
-- BiLSTM (time-series)
-- XGBoost (regression)
-- Librosa (audio processing)
-- SHAP (explainability)
-
-###  Backend
-- Python 3.9+
-- FastAPI
-- Supabase
-- Multi-agent system (Vet / Feed / Meteo / Skin)
-
----
-
-##  System Architecture
-
-###  Acoustic Classification
-```text
-.wav audio → Mel Spectrogram → CNN → Classification
+pip install -r requirements.txt
