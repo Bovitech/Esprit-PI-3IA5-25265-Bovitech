@@ -1,26 +1,26 @@
-# Prédiction de la production laitière (kg / jour)
+# Milk production prediction (kg / day)
 
-Petit projet Python pour **entraîner** un modèle qui estime la quantité de lait par vache et par jour, puis **l’utiliser** sur de nouvelles dates.
-
----
-
-## Ce qu’il y a dans ce dossier
-
-| Fichier | Rôle |
-|--------|------|
-| `train_milk_xgboost.py` | Lit les capteurs / fichiers CSV, assemble le tableau d’entraînement, entraîne le modèle (XGBoost ou forêt aléatoire), enregistre le modèle et les métriques. |
-| `milk_model_inference.py` | Charge le modèle enregistré et prédit la production pour **une** ligne (identifiant vache + date), à partir d’un JSON. |
-| `build_behavior_daily_features.py` | *Optionnel* : à partir de CSV “une ligne par seconde” (comportement), calcule des **résumés par jour** utilisables par le modèle lait. |
-| `requirements.txt` | Liste des bibliothèques Python nécessaires. |
-
-Les fichiers générés par l’entraînement vont par défaut dans le dossier `model_outputs/` (à côté des scripts).
+Small Python project to **train** a model that estimates daily milk yield per cow, then **run** it on new dates.
 
 ---
 
-## Installation
+## What’s in this folder
 
-1. Python 3.9 ou plus récent conseillé.  
-2. Dans ce dossier :
+| File | Purpose |
+|------|---------|
+| `train_milk_xgboost.py` | Loads sensor / CSV data, builds the training table, trains the model (XGBoost or random forest), saves the model and metrics. |
+| `milk_model_inference.py` | Loads the saved model and predicts production for **one** row (cow id + date) from JSON. |
+| `build_behavior_daily_features.py` | *Optional:* from per-second behavior CSVs, builds **daily summaries** the milk model can use. |
+| `requirements.txt` | Python dependencies. |
+
+Training output goes by default into `model_outputs/` next to these scripts.
+
+---
+
+## Setup
+
+1. Use Python 3.9 or newer.  
+2. In this folder:
 
 ```bash
 pip install -r requirements.txt
@@ -28,106 +28,104 @@ pip install -r requirements.txt
 
 ---
 
-## Où mettre les données
+## Where to put your data
 
-Par défaut, le script suppose une arborescence du type :
+By default, scripts expect a layout like:
 
 ```text
-<racine_capteurs>/
-├── behavior_labels/individual/   # CSV par vache (optionnel si tu passes un CSV agrégé)
+<sensor_root>/
+├── behavior_labels/individual/   # per-cow CSVs (optional if you pass a pre-aggregated CSV)
 ├── main_data/
-│   ├── milk/                     # fichiers C*.csv (timestamp, milk_weight_kg, DIM, …)
-│   ├── cbt/                    # température collier (optionnel)
-│   ├── thi/                    # THI / environnement (optionnel)
-│   └── weather/                # météo (optionnel)
+│   ├── milk/                     # C*.csv (timestamp, milk_weight_kg, DIM, …)
+│   ├── cbt/                      # collar / body temperature (optional)
+│   ├── thi/                      # THI / barn environment (optional)
+│   └── weather/                  # weather files (optional)
 ```
 
-Tu peux indiquer la racine de deux façons :
+Point the scripts at that root in two ways:
 
-- **Variable d’environnement** `SENSOR_DATA_ROOT` (chemin vers le dossier qui contient `behavior_labels` et `main_data`)
-- **Ligne de commande** : `--sensor-root "C:\chemin\vers\sensor_data"`
+- **Environment variable** `SENSOR_DATA_ROOT` (folder that contains `behavior_labels` and `main_data`)
+- **CLI** : `--sensor-root "C:\path\to\sensor_data"`
 
 ---
 
-## Utilisation rapide
+## Quick usage
 
-### 1. Entraîner le modèle
-
-```bash
-python train_milk_xgboost.py --sensor-root "C:\chemin\vers\tes_donnees"
-```
-
-Options utiles (voir `--help` pour la liste complète) :
-
-- `--out-dir` : où sauvegarder le modèle (défaut : `./model_outputs`)
-- `--output-prefix` : préfixe des fichiers (`milk_production` par défaut)
-- `--model-type xgb` ou `rf` : XGBoost ou Forêt aléatoire
-- `--behavior-daily-csv chemin.csv` : utiliser un fichier comportement **déjà agrégé par jour** (produit par `build_behavior_daily_features.py`)
-- `--include-weather` / `--no-include-thi` / `--no-include-behavior` etc. : activer ou couper des blocs de variables
-
-À la fin tu obtiens notamment :
-
-- `{prefix}_pipeline.joblib` — le modèle prêt à l’emploi  
-- `{prefix}_metrics.json` — métriques + **liste des colonnes** attendues à l’inférence  
-
-### 2. (Optionnel) Comportement au format “jour”
-
-Si tu as des CSV avec une mesure par seconde (colonne `timestamp` ou `ts_sec`, et `behavior` ou `pred_behavior`, etc.) :
+### 1. Train the model
 
 ```bash
-python build_behavior_daily_features.py --input-dir ".\dossier_des_csv" --output-csv ".\comportement_par_jour.csv"
+python train_milk_xgboost.py --sensor-root "C:\path\to\your_data"
 ```
 
-Puis relance l’entraînement avec :
+Useful flags (see `--help` for everything):
+
+- `--out-dir` — where to save artifacts (default: `./model_outputs`)
+- `--output-prefix` — file prefix (`milk_production` by default)
+- `--model-type xgb` or `rf` — XGBoost vs random forest
+- `--behavior-daily-csv path.csv` — use behavior **already rolled up by day** (from `build_behavior_daily_features.py`)
+- `--include-weather`, `--no-include-thi`, `--no-include-behavior`, etc. — toggle feature blocks
+
+You get:
+
+- `{prefix}_pipeline.joblib` — fitted pipeline for inference  
+- `{prefix}_metrics.json` — metrics plus the **feature column list** inference must use  
+
+### 2. (Optional) Behavior as daily features
+
+If you have per-second CSVs (`timestamp` or `ts_sec`, plus `behavior` or `pred_behavior`, etc.):
 
 ```bash
-python train_milk_xgboost.py --sensor-root "..." --behavior-daily-csv ".\comportement_par_jour.csv"
+python build_behavior_daily_features.py --input-dir ".\folder_of_csvs" --output-csv ".\behavior_daily.csv"
 ```
 
-### 3. Prédire pour un jour donné
+Then train with:
 
-Il faut au minimum `cow_id` et `date` (format `YYYY-MM-DD`). Plus tu remplis de champs (DIM, THI, comportement, historique lait…), plus la prédiction sera cohérente avec l’entraînement.
+```bash
+python train_milk_xgboost.py --sensor-root "..." --behavior-daily-csv ".\behavior_daily.csv"
+```
 
-**Exemple Windows (PowerShell)** — JSON entre guillemets simples à l’extérieur :
+### 3. Predict for one day
+
+You need at least `cow_id` and `date` (`YYYY-MM-DD`). Filling more fields (DIM, THI, behavior, milk history, …) keeps inference closer to how the model was trained.
+
+**PowerShell** — outer single quotes, escaped inner quotes:
 
 ```powershell
 python milk_model_inference.py --json '{\"cow_id\":\"C01\",\"date\":\"2025-07-25\",\"DIM\":120}'
 ```
 
-**Exemple avec un fichier** :
+**From a file:**
 
 ```powershell
 python milk_model_inference.py --json @payload.json
 ```
 
-Si tes fichiers modèle ne sont pas les noms par défaut :
+**Custom artifact names:**
 
 ```powershell
-python milk_model_inference.py --pipeline .\model_outputs\mon_modele_pipeline.joblib --metrics .\model_outputs\mon_modele_metrics.json --json @payload.json
+python milk_model_inference.py --pipeline .\model_outputs\my_model_pipeline.joblib --metrics .\model_outputs\my_model_metrics.json --json @payload.json
 ```
 
-Tu peux aussi fixer le préfixe par défaut côté inférence avec la variable d’environnement `MILK_MODEL_PREFIX` (doit correspondre au `--output-prefix` utilisé à l’entraînement).
+Set `MILK_MODEL_PREFIX` so the default paths match the `--output-prefix` you used when training.
 
 ---
 
-## Ce qui n’est pas dans ce dossier
+## Not included here
 
-Le script `batch_predict_behavior_all_immu.py` (s’il existe ailleurs sur ta machine) sert à lancer la **classification du comportement** sur des fichiers IMMU, pas le modèle lait directement. Pour la chaîne complète : comportement → agrégation journalière → entraînement lait avec `--behavior-daily-csv`.
-
----
-
-## Dépôt GitHub
-
-- Ajoute ce dossier (ou tout le dépôt) à Git **sans** `model_outputs/` ni les gros CSV si tu ne veux pas les versionner : pense à un `.gitignore` avec `model_outputs/`, `*.joblib`, `__pycache__/`, etc.
+`batch_predict_behavior_all_immu.py` (if you keep it elsewhere) only runs **behavior** classification on IMMU files, not milk directly. Full pipeline: behavior → daily aggregation → milk training with `--behavior-daily-csv`.
 
 ---
 
-## Aide
+## GitHub
+
+A `.gitignore` is included so you don’t commit `model_outputs/`, `__pycache__/`, virtualenvs, etc. Add large raw CSV paths if needed.
+
+---
+
+## Help
 
 ```bash
 python train_milk_xgboost.py --help
 python milk_model_inference.py --help
 python build_behavior_daily_features.py --help
 ```
-
-Bon courage pour le repo.
