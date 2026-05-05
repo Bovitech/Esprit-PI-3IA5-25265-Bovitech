@@ -57,8 +57,8 @@ The project combines classical machine learning and deep learning models dependi
 ---
 
 ### Frontend
--React.js
-
+-React
+-NodeJs
 ---
 ### Backend
 - Python  
