@@ -56,6 +56,17 @@ The project combines classical machine learning and deep learning models dependi
 
 ---
 
+### Frontend
+(Not applicable – backend and ML-focused project)
+
+---
+### Backend
+- Python  
+- FastAPI  
+- Supabase  
+- NumPy / Pandas pipeline processing 
+---
+
 ## Installation
 
 ```bash
