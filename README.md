@@ -1,12 +1,10 @@
 # Bovitech: Multimodal Smart Cattle Monitoring System
 
-This repository contains a multimodal machine learning system for intelligent cattle monitoring, combining audio, sensor, and environmental data to model behavior, stress, and productivity in livestock.
+This repository contains a multimodal machine learning system for intelligent cattle monitoring, combining audio, sensor, and environmental data to model behavior, stress, and productivity in livestock.This project was developed as part of an academic program at **ESPRIT School of Engineering**.  
 
 ---
 
 ## Overview
-
-Bovitech is designed to modernize livestock monitoring by integrating wearable IoT sensor data, acoustic analysis, and environmental features into a unified machine learning pipeline.
 
 The system focuses on:
 
