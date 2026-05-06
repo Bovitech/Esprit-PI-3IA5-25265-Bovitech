@@ -16,7 +16,7 @@ DHT dht(DHTPIN, DHTTYPE);
 const char* WIFI_SSID = "Redmi 14C";
 const char* WIFI_PASS = "maram2711";
 // IP du PC = « Carte réseau sans fil Wi-Fi » dans ipconfig (pas VMware VMnet 43.1 / 253.1)
-const char* API_HOST = "192.168.142.189";
+const char* API_HOST = "192.168.56.189";
 const int API_PORT = 8008;
 
 void setup() {
