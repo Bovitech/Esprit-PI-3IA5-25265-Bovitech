@@ -1,8 +1,99 @@
-# Cow Disease Detection (V1)
+# Bovitech: Multimodal Smart Cattle Monitoring System
+
+This repository contains a multimodal machine learning system for intelligent cattle monitoring, combining audio, sensor, and environmental data to model behavior, stress, and productivity in livestock. This project was developed as part of an academic program at **ESPRIT School of Engineering**.
+
+---
+
+## Overview
+
+The system focuses on:
+
+- Behavioral activity recognition from IMU sensor data
+- Acoustic classification of bovine vocalizations
+- Stress prediction using multimodal time-series modeling
+- Milk yield prediction using historical and sensor-derived features
+- Geospatial movement analysis for anomaly detection
+- Computer vision for cattle skin and coat condition classification
+
+The project combines classical machine learning and deep learning models depending on the data modality.
+
+---
+
+## Features
+
+- Behavioral activity recognition from wearable IMU sensor data
+- Acoustic classification using CNNs on Mel spectrograms
+- Stress detection using multimodal time-series deep learning models
+- Milk yield prediction using gradient boosting regression
+- Geospatial tracking and movement pattern analysis
+- Multimodal fusion of environmental and physiological signals
+- Feature engineering from raw sensor streams and temporal aggregation
+- Image classification for cattle dermatological conditions
+
+---
+
+## Requirements
+
+- Python >= 3.9
+- numpy
+- pandas
+- scikit-learn
+- scipy
+- tensorflow >= 2.10
+- keras
+- librosa
+- soundfile
+- xgboost
+- fastapi
+- uvicorn
+- supabase
+- matplotlib
+- tqdm
+- joblib
+- shap
+- ffmpeg
+- libsndfile
+
+---
+
+### Frontend
+
+- React
+- NodeJs
+
+---
+
+### Backend
+
+- Python
+- FastAPI
+- Supabase
+- NumPy / Pandas pipeline processing
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/Malek-ami/Bovitech.git
+cd Bovitech
+
+python -m venv .venv
+
+# Activate environment
+source .venv/bin/activate   # Linux / macOS
+.venv\Scripts\activate      # Windows
+
+pip install -r requirements.txt
+```
+
+---
+
+## Computer Vision: Cow Disease Detection (V1)
 
 Image classification pipeline for cattle skin and coat conditions. Training uses transfer learning on EfficientNet-B3 with strong regularization; inference runs through `pipeline.py` on a single image, a folder, or a webcam.
 
-## Classes
+### Classes
 
 The trained checkpoint predicts five labels:
 
@@ -12,7 +103,7 @@ The trained checkpoint predicts five labels:
 - Pediculosis
 - Ringworm
 
-## Project layout
+### Project layout
 
 ```text
 CowDiseaseV1/
@@ -29,7 +120,7 @@ CowDiseaseV1/
 
 Dataset images are expected under a `data/` directory with `train/`, `valid/`, and `test/` splits. Each split should contain one subfolder per class. `train2.py` resolves `data/` from the current working directory, from `CowDiseaseV1/`, or from the parent project folder.
 
-## Setup
+### Setup
 
 From `CowDiseaseV1/`:
 
@@ -49,13 +140,13 @@ pip install opencv-python
 pip install imagehash
 ```
 
-## Training
+### Training
 
 ```bash
 python train2.py
 ```
 
-### Hyperparameters
+#### Hyperparameters
 
 | Setting | Value |
 | --- | --- |
@@ -75,7 +166,7 @@ python train2.py
 | Seed | 42 |
 | Data workers | 4 |
 
-### Training process
+#### Training process
 
 1. Load `train/`, `valid/`, and `test/` with `ImageFolder` and `DataLoader`.
 2. Apply heavy augmentation on the training split (random resized crop, flips, rotation, color jitter, grayscale, perspective, blur, random erasing) and resize plus center crop on validation and test.
@@ -86,7 +177,7 @@ python train2.py
 7. Each epoch evaluates on the validation set, saves the best checkpoint to `outputs/best_model.pth`, and stops early if validation accuracy does not improve for 10 epochs.
 8. After training, reload the best weights, evaluate on the test set, and write metrics to `outputs/history.json`.
 
-### Model architecture
+#### Model architecture
 
 - Backbone: EfficientNet-B3 feature extractor (`features[0]` through `features[8]`)
 - Pooling: global average pooling
@@ -95,7 +186,7 @@ python train2.py
 
 The saved checkpoint stores `state_dict`, `class_names`, `config`, and `val_acc`.
 
-## Inference
+### Inference
 
 Run from `CowDiseaseV1/` so the default checkpoint path resolves correctly.
 
@@ -123,7 +214,7 @@ Optional arguments:
 - `--top_k 3`
 - `--device cuda` or `--device cpu`
 
-## Supporting scripts
+### Supporting scripts
 
 Offline class balancing before retraining:
 
@@ -143,7 +234,7 @@ Overfitting report from the last training run:
 python Check_overfit.py
 ```
 
-## Outputs
+### Outputs
 
 - `outputs/best_model.pth`: weights for the best validation epoch
 - `outputs/history.json`: training curves used by `Check_overfit.py`
