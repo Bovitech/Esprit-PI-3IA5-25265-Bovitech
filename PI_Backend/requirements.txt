@@ -1,0 +1,5 @@
+# Django PI_Backend — Django 6.x n’est pas encore sur PyPI ; LTS 5.2 recommandée.
+Django>=5.2,<6
+djangorestframework>=3.15
+djangorestframework-simplejwt>=5.4
+django-cors-headers>=4.6

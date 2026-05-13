@@ -1,0 +1,367 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+  color: #12263f;
+}
+
+header {
+  height: 72px;
+  background: #2c7be5;
+  color: white;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 23px;
+}
+
+header p {
+  margin: 4px 0 0;
+  opacity: 0.9;
+  font-size: 13px;
+}
+
+/* Full-width map only; panels are drawers */
+main {
+  height: calc(100vh - 72px);
+}
+
+.map-section {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Top buttons: open farm setup (left) or cow/herd (right) */
+.map-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.map-toolbar > * {
+  pointer-events: auto;
+}
+
+.toolbar-btn {
+  width: auto;
+  margin: 0;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #2c7be5;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.toolbar-btn:hover {
+  background: #1a5cb0;
+}
+
+.toolbar-btn.is-active {
+  background: #1557a0;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Dim map when a drawer is open */
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  background: rgba(15, 34, 58, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.drawer-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Slide-in panels */
+.drawer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 22;
+  width: min(340px, 92vw);
+  max-width: 100%;
+  background: #fff;
+  box-shadow: 0 0 28px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.26s ease;
+  pointer-events: none;
+}
+
+.drawer.is-open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.drawer--left {
+  left: 0;
+  transform: translateX(-100%);
+}
+
+.drawer--right {
+  right: 0;
+  transform: translateX(100%);
+}
+
+.drawer__head {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.drawer__head h3 {
+  margin: 0;
+  font-size: 17px;
+  color: #12263f;
+}
+
+.drawer__close {
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 8px;
+  background: #e8eef5;
+  color: #12263f;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.drawer__close:hover {
+  background: #d5dee9;
+}
+
+.drawer__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Farm tools (inside left drawer) */
+.map-tools {
+  padding: 14px 16px 20px;
+}
+
+.map-tools label {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.map-tools .hint {
+  font-size: 11px;
+  color: #6c757d;
+  margin-top: 8px;
+}
+
+.map-tools button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #2c7be5;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.map-tools button:hover {
+  background: #1a5cb0;
+}
+
+select,
+input[type="range"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #cfd7df;
+  border-radius: 6px;
+}
+
+/* Right drawer: collapsible <details> blocks */
+.drawer-details {
+  padding: 10px 12px 20px;
+}
+
+.detail-group {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.detail-group summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 12px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1e3a5f;
+  background: #f1f5f9;
+  border-bottom: 1px solid transparent;
+  user-select: none;
+}
+
+.detail-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.detail-group summary::after {
+  content: "▾";
+  float: right;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.detail-group:not([open]) summary::after {
+  content: "▸";
+}
+
+.detail-group[open] summary {
+  border-bottom-color: #e2e8f0;
+}
+
+.detail-group__inner {
+  padding: 12px 14px 4px;
+}
+
+.drawer-details h2 {
+  margin: 16px 0 8px;
+  font-size: 16px;
+}
+
+.drawer-details h2:first-child {
+  margin-top: 0;
+}
+
+.drawer-details p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.drawer-details button#playBtn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #2c7be5;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.drawer-details button#playBtn:hover {
+  background: #1a5cb0;
+}
+
+#slider {
+  margin-top: 14px;
+}
+
+.legend {
+  position: absolute;
+  bottom: 18px;
+  left: 16px;
+  max-width: min(280px, calc(100% - 32px));
+  background: rgba(255, 255, 255, 0.96);
+  padding: 12px;
+  border-radius: 10px;
+  z-index: 14;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  font-size: 13px;
+}
+
+.dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.green {
+  background: #00b894;
+}
+
+.red {
+  background: #e63757;
+}
+
+.orange {
+  background: #f39c12;
+}
+
+.blue {
+  background: #2c7be5;
+}
+
+.cow-marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.cow-marker.selected {
+  border: 4px solid #12263f;
+  transform: scale(1.18);
+}
+
+.pred-marker {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2c7be5;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}

@@ -1,0 +1,275 @@
+TITLE: Small-Scale Dairy Farming Manual
+URL: https://www.fao.org/4/t1265e/t1285e05.htm
+
+Small-Scale Dairy Farming Manual
+Volume 5
+Husbandry Unit 10.5: Mastitis
+
+Mastitis is an inflammation of the mammary glands and may be acute or chronic.
+
+How can you know if your cow has mastitis?
+You should know:
+- the signs
+- the tests
+
+Why do cows get mastitis?
+If the teats are not healthy and clean, bacteria may enter and cause mastitis.
+
+How can you treat and prevent mastitis?
+- always call the veterinarian if one of your cows has mastitis
+- make sure your cows have good health, hygiene, and housing
+
+The cost of mastitis
+In many dairy countries, mastitis may be the most costly disease of the dairy industry.
+Obvious costs include:
+- veterinary treatment and drugs
+- lost production from affected udders
+- withdrawal time for milk and meat due to antibiotic residues after treatment
+
+There are also hidden costs:
+- cows with subclinical mastitis may have low milk production
+- milk from cows with mastitis is lower in quality
+- milk contains more cells and less lactose, fat, protein, and other desirable substances
+- dairy payment may decrease
+
+Mastitis in buffalo
+In lactating herds, mastitis is of major importance.
+
+Why is mastitis important?
+- mastitis costs money
+- veterinary fees and medicines increase
+- low-quality milk brings less income
+- milk with antibiotics may be rejected
+- all forms of mastitis reduce milk production
+
+Definition of mastitis
+Mastitis cases can be grouped according to symptoms.
+
+Types of mastitis
+
+Acute mastitis
+- poor general condition
+- high fever
+- low feed intake
+- udder is hot, swollen, hard, painful
+- milk is abnormal, watery, thin, with flecks or clots, yellow or brownish
+
+Chronic mastitis
+Chronic hidden mastitis:
+- cow and milk may appear normal
+- less milk
+- poor milk quality
+
+Chronic mild mastitis:
+- glands slightly hard, swollen, painful
+- milk slightly abnormal, watery, discolored
+
+Chronic mastitis with gland shrinkage:
+- scar tissue replaces gland tissue
+- gland becomes hard and shrinks
+- no milk production from the gland
+
+The strip test
+The strip test should be performed before each milking because:
+- it helps detect clinical mastitis
+- it flushes out bacteria in the teat canal
+- it stimulates milk let-down
+
+Use a strip cup and clean it between each milking.
+
+How can you know if your cow has mastitis?
+Check the cow:
+- fever
+- low feed intake
+
+Check the udder:
+- swollen
+- hard
+- red
+- hot
+- painful
+
+Check the milk:
+- milk a few streams from one teat into the strip cup
+- examine carefully
+- clean the strip cup
+- repeat for the next teat
+
+California Mastitis Test (CMT)
+CMT can detect subclinical mastitis.
+It measures somatic cells in the milk.
+It gives a rough indication of cell count, but laboratory counts are more exact.
+
+Other factors such as age, stage of lactation, teat injury, stress, or other disease can also affect cell count.
+
+Agents causing mastitis
+Infection with bacteria or fungi is the usual cause.
+The normal route of infection is through the teat canal and then through the mammary gland.
+
+Common bacteria include:
+- Staphylococcus aureus
+- Streptococcus agalactiae
+- other streptococci
+- coliform bacteria
+- Pseudomonas
+- Corynebacterium pyogenes
+
+Streptococcus agalactiae survives mainly in the cow udder, so it can be eradicated if all infected cows are treated.
+Other bacteria survive in the environment, on milking tools, and on hands, so hygiene is essential.
+
+Why do cows get mastitis?
+In healthy teats, few bacteria enter because:
+- the skin protects against bacteria
+- the teat opening is tight
+- a waxy substance seals the opening
+
+If the teat is unhealthy, injured, or very dirty:
+- many bacteria can enter
+- the cow may not be able to protect itself
+- bacteria increase in number and spread
+- the cow gets mastitis
+
+Cows can also get mastitis because other diseases, such as metritis, pneumonia, digestive problems, or low nutrition, make them weak.
+
+Treatment of mastitis
+Treat mastitis as soon as you diagnose it.
+Infusion of an antibiotic preparation into the teat canal is the normal treatment.
+In acute cases, systemic treatment may be necessary.
+
+Important points:
+- penicillin has traditionally been used, but some staphylococci are resistant
+- if resistance is suspected, a milk sample should be sent for culture and antibiotic sensitivity testing
+- clean, dry, and disinfect the teat before infusion
+- do not push the cannula too far into the teat canal
+- partial insertion gives better results and reduces damage
+
+How can you treat mastitis?
+- call the veterinarian
+- the veterinarian may take a milk sample for testing
+- antibiotics may be infused into the teat
+- antibiotics may sometimes be injected into the muscle or bloodstream if the cow shows poor general condition
+
+Drug residues
+Some people are allergic to antibiotics in food.
+Because of this, withdrawal times must be strictly respected.
+
+Rules:
+- discard milk from all 4 quarters from treated cows
+- do not send milk to the collection center for some days after treatment
+- do not send the animal for slaughter for some days after treatment
+- consult the veterinarian about the exact withdrawal period
+
+Many countries have laws against delivering milk or meat containing antibiotics.
+
+Clean milk utensils
+Milking utensils that are not sufficiently clean may contaminate milk.
+You must:
+- thoroughly clean and disinfect milk cans, buckets, and utensils after use
+- keep them in a clean, dust-free, well-ventilated place
+
+How can you prevent mastitis?
+
+Hygiene before milking
+- wash dirty buffaloes after wallowing and wash cows if they are dirty
+- clean any area where animals are likely to lie down
+- clean hands thoroughly before milking
+- rinse hands in disinfectant after washing
+- if you use a milking machine, clean and disinfect it after each milking and make sure it works correctly
+
+Teat dipping
+Udder cleaning before milking is not enough.
+After milking, bacteria can remain on the teat.
+Teat dipping after every milking is essential to mastitis control.
+
+Before milking
+- milk 2 or 3 streams of foremilk from each quarter into a strip cup
+- examine carefully
+- wash teats in clean or sanitized running water
+- dry the teats and udder with disposable paper towel or a clean dry cloth
+- use one cloth per cow when possible
+
+During milking
+- plan the order of milking
+- first milk cows without mastitis
+- then cows with suspected mastitis
+- finally cows with mastitis
+- make sure milking is complete
+
+Dry cow treatment
+The best time to treat subclinical mastitis is at the beginning of the dry period, following the last milking.
+
+Advantages:
+- cure rate is higher than treatment during lactation
+- new infections during the dry period are reduced
+- damaged udder tissue has time to recover
+- clinical mastitis at the beginning of the next lactation is reduced
+- no milk is withdrawn because the cow is dry
+
+Long-acting antibiotic preparations made for intramammary dry cow treatment should not be used during lactation.
+
+After milking
+Dip the teats in disinfectant solution, for example:
+- hypochlorite solution
+- chlorhexidine solution
+- iodophor solution
+
+Early detection and early treatment
+- look out for changes in milk, udder, and general condition
+- treat teat and udder wounds immediately
+- treat visible mastitis as soon as possible
+- treat hidden mastitis at drying off
+
+Culling
+Cull cows:
+- with repeated mastitis
+- that do not respond to treatment
+
+Checking new animals
+Check new animals for mastitis before mixing them with the herd.
+
+Housing
+- protect cows from wounds
+- avoid short boxes and poor tie systems
+- remove manure and dirt
+- keep the barn clean
+- keep floors dry and provide bedding
+- keep flies out
+- avoid untrimmed hooves and slippery floors that may injure the udder
+
+Records
+Keep records of:
+- identity of infected cows
+- time of infection
+- symptoms
+- treatment
+- cell counts if available
+
+Preventing mastitis in buffalo
+Buffaloes may be more susceptible because of:
+- preference for water and muddy places
+- dirty milking places
+- close contact between healthy and diseased animals
+- overcrowding
+- poor milking technique
+- large pendulous udders and teats prone to injury
+- calves causing udder injury
+- rough driving and running
+
+How can you prevent mastitis in buffalo?
+- wash buffaloes before milking
+- use correct milking technique
+- if calves suckle, wean them early
+- treat udder and teats gently
+- do not drive animals roughly or make them run
+
+Important
+Injury or damage to the udder leads to mastitis.
+Protect the cow from injury and damage.
+
+High-risk periods for mastitis
+- early lactation
+- just after calving
+- beginning and end of the dry period
+
+Just after calving, uterine discharge contains bacteria that can cause mastitis, so the cow and her environment should be kept very clean.
+At the beginning and end of the dry period, teat dipping twice a day during the first week after drying off can be useful.

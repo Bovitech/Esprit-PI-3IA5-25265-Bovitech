@@ -1,0 +1,7 @@
+prompt: |
+  Résume cette conversation très brièvement (3-5 phrases) en conservant
+  les informations importantes sur les vaches et problèmes mentionnés :
+
+  {conversation}
+
+  Résumé :

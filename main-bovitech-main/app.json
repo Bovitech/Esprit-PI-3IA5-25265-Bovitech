@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "BoviTech",
+    "slug": "bovitech",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#1A3C2E"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1A3C2E"
+      },
+      "package": "com.bovitech.app",
+      "usesCleartextTraffic": true,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "RECORD_AUDIO",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "plugins": [
+      "expo-location",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "BoviTech utilise le micro pour convertir votre voix en texte (comme le chat web)."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1A3C2E"
+        }
+      ]
+    ],
+    "scheme": "bovitech"
+  }
+}

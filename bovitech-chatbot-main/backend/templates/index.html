@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bovitech — Assistant Bovin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1B4332; --green-light: #2d6a4f; --green-pale: #e6f0ea;
+    --cream: #f7f5f0; --text: #1e1e1c; --muted: #8a8972;
+    --border: #e8e2d9; --user-bg: #2d6a4f; --bot-bg: #ffffff;
+    --radius: 18px; --red: #c0392b; --orange: #e67e22; --blue: #2980b9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 80%, #d8f3dc44 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, #b7e4c744 0%, transparent 50%);
+  }
+
+  .app {
+    width: 440px;
+    height: 680px;
+    background: #f4f7f5;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 40px rgba(45,106,79,0.12), 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+
+  .header {
+    padding: 16px 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--green);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after{
+    content:"";
+    position:absolute;
+    width:190px;
+    height:190px;
+    border-radius:95px;
+    background:rgba(255,255,255,0.08);
+    right:-52px;
+    top:-85px;
+  }
+
+  .header-icon {
+    width: 42px; height: 42px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    z-index: 1;
+  }
+
+  .header-text h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px; font-weight: 400;
+    color: #fff; letter-spacing: -0.3px;
+  }
+
+  .header-text p {
+    font-size: 12px; color: rgba(255,255,255,0.78); font-weight: 300; margin-top: 1px;
+  }
+
+  .header-right {
+    margin-left: auto; display: flex; align-items: center; gap: 10px;
+    z-index: 1;
+  }
+
+  select#lang-select {
+    padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.26);
+    background: rgba(255,255,255,0.14); color:#fff; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif;
+  }
+  select#lang-select option { color: var(--text); }
+
+  .status-dot {
+    width: 7px; height: 7px; background: #52b788; border-radius: 50%;
+    box-shadow: 0 0 0 3px #d8f3dc; animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 3px #d8f3dc; }
+    50% { box-shadow: 0 0 0 5px #d8f3dc88; }
+  }
+
+  #chatbox {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  #chatbox::-webkit-scrollbar { width: 4px; }
+  #chatbox::-webkit-scrollbar-track { background: transparent; }
+  #chatbox::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .msg-row { display: flex; flex-direction: column; gap: 4px; }
+  .msg-row.user { align-items: flex-end; }
+  .msg-row.bot  { align-items: flex-start; }
+
+  .msg {
+    padding: 11px 15px;
+    border-radius: var(--radius);
+    max-width: 82%;
+    font-size: 14px;
+    line-height: 1.6;
+    word-break: break-word;
+  }
+
+  .msg.user {
+    background: var(--user-bg);
+    color: white;
+    border-bottom-right-radius: 5px;
+  }
+
+  .msg.bot {
+    background: var(--bot-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 5px;
+    white-space: pre-wrap;
+  }
+
+  .msg.bot ul { padding-left: 18px; margin-top: 6px; }
+  .msg.bot li { margin-bottom: 4px; }
+  .msg.bot p  { margin-bottom: 6px; }
+  .msg.bot strong { color: var(--green); }
+
+  .msg-image {
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .tts-controls { display: flex; gap: 6px; padding-left: 4px; }
+
+  .tts-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .tts-btn:hover:not(:disabled) {
+    background: var(--green-pale);
+    border-color: var(--green-light);
+    color: var(--green);
+  }
+
+  .tts-btn:disabled { opacity: 0.4; cursor: default; }
+  .tts-btn.playing  { background: var(--green-pale); border-color: var(--green); color: var(--green); }
+
+  .composer {
+    padding: 8px 14px 12px;
+    border-top: 1px solid var(--border);
+    background: white;
+    flex-shrink: 0;
+  }
+
+  #image-preview-strip {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  #image-preview-strip.visible { display: flex; }
+
+  #preview-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+  }
+
+  #remove-image-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--muted);
+    padding: 0 4px;
+    line-height: 1;
+  }
+
+  #remove-image-btn:hover { color: var(--red); }
+
+  .composer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #message-input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  #message-input:focus { border-color: var(--green-light); background: white; }
+  #message-input::placeholder { color: var(--muted); }
+
+  .icon-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  #mic-btn  { background: var(--green-pale); color: var(--green); }
+  #mic-btn:hover { background: #b7e4c7; }
+
+  #mic-btn.recording {
+    background: #ffe0e0;
+    color: var(--red);
+    animation: rec-pulse 1s infinite;
+  }
+
+  @keyframes rec-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(192,57,43,0); }
+  }
+
+  #img-btn  { background: #f0f0e8; color: var(--muted); font-size: 18px; }
+  #img-btn:hover { background: var(--green-pale); color: var(--green); }
+  #img-btn.has-image { background: var(--green-pale); color: var(--green); }
+
+  #send-btn { background: var(--green); color: white; }
+  #send-btn:hover { background: var(--green-light); }
+
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 14px 16px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    border-bottom-left-radius: 5px;
+    width: fit-content;
+  }
+
+  .typing span {
+    width: 6px; height: 6px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  .fade-in { animation: fadeIn 0.2s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .agent-card {
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.9;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .vet-card {
+    background: var(--green-pale);
+    border: 1px solid var(--green-light);
+  }
+
+  .vet-card .card-title { font-weight: 700; font-size: 15px; color: var(--green); margin-bottom: 6px; }
+  .vet-card .vet-name   { font-weight: 600; }
+  .vet-card .vet-dist   { color: var(--muted); font-size: 13px; }
+  .vet-card .vet-phone  { color: var(--muted); font-size: 13px; }
+  .vet-card .vet-others { margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+  .vet-card .vet-others p { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .vet-card .vet-others li { font-size: 13px; color: var(--text); }
+
+  .map-btn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 7px 14px;
+    background: var(--green);
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+
+  .map-btn:hover { background: var(--green-light); }
+  .vet-warning { color: var(--orange); font-size: 13px; margin-bottom: 6px; }
+
+  .meteo-card { background: white; border: 2px solid var(--green); }
+  .meteo-card .meteo-header  { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+  .meteo-card .meteo-verdict { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .meteo-card .meteo-stats {
+    color: var(--muted); font-size: 12px;
+    background: var(--cream); border-radius: 8px;
+    padding: 4px 10px; display: inline-block; margin-bottom: 8px;
+  }
+  .meteo-card .meteo-reason { margin-top: 4px; }
+  .meteo-card .meteo-tip    { margin-top: 6px; font-style: italic; color: var(--muted); }
+  .meteo-card .meteo-rain   { color: var(--blue); font-size: 13px; margin: 4px 0; }
+
+  .feed-card { background: white; border: 2px solid #52b788; }
+  .feed-card .feed-title {
+    font-weight: 700; font-size: 15px;
+    color: var(--green); margin-bottom: 6px;
+  }
+  .feed-card .feed-stats {
+    font-size: 12px; color: var(--muted);
+    background: var(--cream); border-radius: 8px;
+    padding: 4px 10px; display: inline-block; margin-bottom: 8px;
+  }
+  .feed-card .feed-row {
+    display: flex; gap: 8px; padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .feed-card .feed-row:last-of-type { border-bottom: none; }
+  .feed-card .feed-label { font-weight: 600; min-width: 130px; color: var(--text); }
+  .feed-card .feed-warning { color: var(--orange); font-weight: 600; margin-top: 8px; }
+  .feed-card .feed-tip    { margin-top: 8px; font-style: italic; color: var(--muted); }
+
+  .skin-card {
+    background: white;
+    border: 2px solid #7b5ea7;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.9;
+  }
+
+  .skin-card .skin-header { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+
+  .skin-card .skin-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .skin-card .skin-badge.high   { background: #e8f5e9; color: #2d6a2f; }
+  .skin-card .skin-badge.medium { background: #fff3e0; color: #9a5200; }
+  .skin-card .skin-badge.low    { background: #fce4ec; color: #880e2f; }
+
+  .skin-card .skin-class   { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+  .skin-card .skin-desc    { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+  .skin-card .skin-bars    { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .skin-card .skin-bar-row { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .skin-card .skin-bar-label { min-width: 120px; color: var(--text); }
+  .skin-card .skin-bar-track { flex: 1; height: 6px; background: #f0ede8; border-radius: 3px; overflow: hidden; }
+  .skin-card .skin-bar-fill  { height: 100%; border-radius: 3px; transition: width 0.4s; }
+  .skin-card .skin-bar-pct   { min-width: 36px; text-align: right; color: var(--muted); }
+  .skin-card .skin-disclaimer {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="header-icon">🐄</div>
+    <div class="header-text">
+      <h1 id="app-title">BoviTech</h1>
+      <p id="app-subtitle">Assistant spécialisé en élevage bovin</p>
+    </div>
+    <div class="header-right">
+      <select id="lang-select">
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+      <div class="status-dot" title="Backend online"></div>
+    </div>
+  </div>
+
+  <div id="chatbox"></div>
+
+  <div class="composer">
+    <div id="image-preview-strip">
+      <img id="preview-thumb" src="" alt="preview"/>
+      <span id="preview-name"></span>
+      <button id="remove-image-btn" title="Supprimer l'image">✕</button>
+    </div>
+
+    <div class="composer-row">
+      <button id="mic-btn" class="icon-btn" type="button" title="Microphone">🎤</button>
+      <button id="img-btn" class="icon-btn" type="button" title="Analyser une image">🔬</button>
+      <input id="message-input" placeholder="Posez votre question…" autocomplete="off" />
+      <button id="send-btn" class="icon-btn" type="button" title="Envoyer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <input type="file" id="image-file-input" accept="image/*" style="display:none"/>
+</div>
+
+<script>
+const API_URL  = "http://127.0.0.1:8000/chatbot/";
+const STT_URL  = "http://127.0.0.1:8000/chatbot/stt/";
+const TTS_URL  = "http://127.0.0.1:8000/chatbot/tts/";
+const SKIN_URL = "http://127.0.0.1:8000/chatbot/skin/";
+
+const chatbox      = document.getElementById("chatbox");
+const input        = document.getElementById("message-input");
+const sendBtn      = document.getElementById("send-btn");
+const micBtn       = document.getElementById("mic-btn");
+const imgBtn       = document.getElementById("img-btn");
+const fileInput    = document.getElementById("image-file-input");
+const previewStrip = document.getElementById("image-preview-strip");
+const previewThumb = document.getElementById("preview-thumb");
+const previewName  = document.getElementById("preview-name");
+const removeImgBtn = document.getElementById("remove-image-btn");
+const langSelect   = document.getElementById("lang-select");
+
+let currentLang  = localStorage.getItem("lang") || "fr";
+let userLocation = { lat: null, lon: null };
+
+/** Demande la position si encore inconnue (refus au chargement, ou message envoyé trop tôt). */
+function refreshLocationIfNeeded() {
+  return new Promise(resolve => {
+    if (userLocation.lat != null && userLocation.lon != null) {
+      resolve();
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      resolve();
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        userLocation.lat = pos.coords.latitude;
+        userLocation.lon = pos.coords.longitude;
+        resolve();
+      },
+      () => resolve(),
+      { enableHighAccuracy: false, timeout: 20000, maximumAge: 0 }
+    );
+  });
+}
+let sessionId    = localStorage.getItem("session_id") || crypto.randomUUID();
+let pendingImage = null;
+
+localStorage.setItem("session_id", sessionId);
+
+langSelect.value  = currentLang;
+document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
+input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+updateLanguageUI();
+
+langSelect.onchange = () => {
+  currentLang = langSelect.value;
+  localStorage.setItem("lang", currentLang);
+  document.body.dir = currentLang === "ar" ? "rtl" : "ltr";
+  input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+  updateLanguageUI();
+};
+
+function updateLanguageUI() {
+  if (currentLang === "ar") {
+    document.getElementById("app-title").textContent    = "بوفيتيك";
+    document.getElementById("app-subtitle").textContent = "مساعد متخصص في تربية الأبقار";
+  } else {
+    document.getElementById("app-title").textContent    = "BoviTech";
+    document.getElementById("app-subtitle").textContent = "Assistant spécialisé en élevage bovin";
+  }
+}
+
+let currentAudio = null;
+let currentPlayBtn = null;
+let currentStopBtn = null;
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  if (currentPlayBtn) {
+    currentPlayBtn.innerHTML = "🔊 Écouter";
+    currentPlayBtn.classList.remove("playing");
+    currentPlayBtn.disabled = false;
+  }
+  if (currentStopBtn) currentStopBtn.disabled = true;
+  currentPlayBtn = null;
+  currentStopBtn = null;
+}
+
+async function playTTS(text, playBtn, stopBtn) {
+  stopAudio();
+  try {
+    playBtn.innerHTML = "⏳…";
+    playBtn.disabled = true;
+
+    const res = await fetch(TTS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, lang: currentLang }),
+    });
+
+    if (!res.ok) throw new Error("TTS failed");
+
+    const blob = await res.blob();
+    currentAudio = new Audio(URL.createObjectURL(blob));
+    currentPlayBtn = playBtn;
+    currentStopBtn = stopBtn;
+
+    playBtn.innerHTML = "🔊 En cours…";
+    playBtn.classList.add("playing");
+    stopBtn.disabled = false;
+
+    currentAudio.onended = stopAudio;
+    currentAudio.play();
+  } catch {
+    playBtn.innerHTML = "🔊 Écouter";
+    playBtn.disabled = false;
+  }
+}
+
+function addTyping() {
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+  row.id = "typing-row";
+  row.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById("typing-row");
+  if (t) t.remove();
+}
+
+function addTTSControls(row, getTextFn) {
+  const controls = document.createElement("div");
+  controls.className = "tts-controls";
+
+  const playBtn = document.createElement("button");
+  playBtn.className = "tts-btn";
+  playBtn.innerHTML = "🔊 Écouter";
+  playBtn.onclick = () => playTTS(getTextFn(), playBtn, stopBtn);
+
+  const stopBtn = document.createElement("button");
+  stopBtn.className = "tts-btn";
+  stopBtn.innerHTML = "⏹ Stop";
+  stopBtn.disabled = true;
+  stopBtn.onclick = stopAudio;
+
+  controls.appendChild(playBtn);
+  controls.appendChild(stopBtn);
+  row.appendChild(controls);
+
+  return { playBtn, stopBtn };
+}
+
+function addTextMessage(text) {
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const msg = document.createElement("div");
+  msg.className = "msg bot";
+  msg.textContent = text;
+  row.appendChild(msg);
+
+  const { playBtn } = addTTSControls(row, () => msg.textContent);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+
+  return { msg, playBtn };
+}
+
+function addUserMessage(text, imageFile = null) {
+  const row = document.createElement("div");
+  row.className = "msg-row user fade-in";
+
+  const msg = document.createElement("div");
+  msg.className = "msg user";
+
+  if (imageFile) {
+    const img = document.createElement("img");
+    img.className = "msg-image";
+    img.src = URL.createObjectURL(imageFile);
+    img.alt = "image";
+    msg.appendChild(img);
+  }
+
+  if (text) {
+    const t = document.createElement("span");
+    t.textContent = text;
+    msg.appendChild(t);
+  }
+
+  row.appendChild(msg);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function renderVetCard(data) {
+  const ar = currentLang === "ar";
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const card = document.createElement("div");
+  card.className = "agent-card vet-card";
+
+  if (!data.found || !data.best) {
+    card.innerHTML = `<p class="card-title">${ar ? "لم يتم العثور على طبيب بيطري" : "❌ Aucun vétérinaire trouvé"}</p>
+  <p style="font-size:13px;color:var(--muted)">${ar ? "حاول Google Maps أو وسّع نطاق البحث." : "Essayez Google Maps ou augmentez la zone de recherche."}</p>`;
+    } else {
+    const { name, distance_km, phone, map_url } = data.best;
+    const warningHtml = data.warning ? `<p class="vet-warning">⚠️ ${data.warning}</p>` : "";
+    const phoneHtml = phone
+      ? `<p class="vet-phone">📞 ${phone}</p>`
+      : `<p class="vet-phone">📞 ${ar ? "الهاتف غير متوفر" : "Téléphone non disponible"}</p>`;
+
+    let othersHtml = "";
+    if (data.others && data.others.length > 0) {
+      const items = data.others.map(v =>
+        `<li><a href="${v.map_url}" target="_blank" style="color:var(--green)">${v.name}</a> — ${v.distance_km} km</li>`
+      ).join("");
+      othersHtml = `<div class="vet-others"><p>🔹 ${ar ? "خيارات أخرى" : "Autres options"}</p><ul>${items}</ul></div>`;
+    }
+
+    card.innerHTML = `
+      ${warningHtml}
+      <p class="card-title">🐄 ${ar ? "الطبيب البيطري الموصى به" : "Vétérinaire recommandé"}</p>
+      <p class="vet-name">📍 ${name} — <span class="vet-dist">${distance_km} km</span></p>
+      ${phoneHtml}
+      <a href="${map_url}" target="_blank" class="map-btn">📍 ${ar ? "عرض على خرائط Google" : "Voir sur Google Maps"}</a>
+      ${othersHtml}`;
+  }
+
+  row.appendChild(card);
+  addTTSControls(row, () => card.textContent);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function renderMeteoCard(data) {
+  const ar = currentLang === "ar";
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const { decision, temp, rain, wind, is_day, next_3h_rain_pct, reason, tip } = data;
+
+  const configs = {
+    out: {
+      color: "#2d6a4f",
+      header: ar ? "🌤️ الطقس مناسب" : "🌤️ Conditions favorables",
+      verdict: ar ? "✅ يمكن إخراج الأبقار" : "✅ Les vaches peuvent sortir",
+    },
+    in: {
+      color: "#c0392b",
+      header: is_day
+        ? (ar ? "🌧️ الطقس غير مناسب" : "🌧️ Conditions défavorables")
+        : (ar ? "🌙 وقت الليل" : "🌙 C'est la nuit"),
+      verdict: is_day
+        ? (ar ? "❌ أبقِ الأبقار في الداخل" : "❌ Gardez les vaches à l'intérieur")
+        : (ar ? "❌ الأبقار تبقى في الداخل" : "❌ Les vaches restent à l'intérieur"),
+    },
+    limited: {
+      color: "#e67e22",
+      header: ar ? "⚠️ خروج محدود" : "⚠️ Sortie limitée",
+      verdict: ar ? "⚠️ الخروج صباحاً أو مساءً فقط" : "⚠️ Sortir tôt matin / soir uniquement",
+    },
+  };
+
+  const cfg = configs[decision] || configs.out;
+  const timeLabel = is_day ? "☀️ Jour" : "🌙 Nuit";
+  const rainWarn = next_3h_rain_pct > 60
+    ? `<p class="meteo-rain">🌂 ${ar ? `احتمال مطر خلال 3 ساعات (${next_3h_rain_pct}%)` : `Pluie probable dans 3h (${next_3h_rain_pct}%)`}</p>`
+    : "";
+
+  const card = document.createElement("div");
+  card.className = "agent-card meteo-card";
+  card.style.borderColor = cfg.color;
+  card.innerHTML = `
+    <p class="meteo-header">${cfg.header}</p>
+    <p class="meteo-verdict" style="color:${cfg.color}">${cfg.verdict}</p>
+    <p class="meteo-stats">🌡️ ${temp}°C &nbsp;|&nbsp; 🌧️ ${rain}mm &nbsp;|&nbsp; 💨 ${wind} km/h &nbsp;|&nbsp; ${timeLabel}</p>
+    ${rainWarn}
+    <p class="meteo-reason">• ${reason}</p>
+    <p class="meteo-tip">👉 ${tip}</p>`;
+
+  row.appendChild(card);
+  addTTSControls(row, () => card.textContent);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function renderFeedCard(data) {
+  const ar = currentLang === "ar";
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const { season, temp, is_day, main_feed, supplement, water, warning, tip } = data;
+  const seasonEmoji = { hiver:"❄️", printemps:"🌱", été:"☀️", automne:"🍂" }[season] || "🌿";
+  const timeLabel = is_day ? (ar ? "صباح" : "matin") : (ar ? "مساء/ليل" : "soir/nuit");
+
+  const labels = ar
+    ? { title:"توصيات التغذية اليوم", main:"🌾 العلف الأساسي", supp:"💊 المكملات", water:"💧 الماء", tip:"👉 نصيحة" }
+    : { title:"Alimentation recommandée aujourd'hui", main:"🌾 Fourrage principal", supp:"💊 Compléments", water:"💧 Eau", tip:"👉 Conseil" };
+
+  const warningHtml = warning ? `<p class="feed-warning">⚠️ ${warning}</p>` : "";
+
+  const card = document.createElement("div");
+  card.className = "agent-card feed-card";
+  card.innerHTML = `
+    <p class="feed-title">${seasonEmoji} ${labels.title}</p>
+    <p class="feed-stats">🌡️ ${temp}°C &nbsp;|&nbsp; ${seasonEmoji} ${season} &nbsp;|&nbsp; 🕐 ${timeLabel}</p>
+    <div class="feed-row"><span class="feed-label">${labels.main}</span><span>${main_feed}</span></div>
+    <div class="feed-row"><span class="feed-label">${labels.supp}</span><span>${supplement}</span></div>
+    <div class="feed-row"><span class="feed-label">${labels.water}</span><span>${water}</span></div>
+    ${warningHtml}
+    <p class="feed-tip">${labels.tip} ${tip}</p>`;
+
+  row.appendChild(card);
+  addTTSControls(row, () => card.textContent);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function renderSkinCard(data) {
+  const ar = currentLang === "ar";
+  const row = document.createElement("div");
+  row.className = "msg-row bot fade-in";
+
+  const confidencePct = Math.round(data.confidence * 100);
+  const levelLabels = {
+    high: ar ? "ثقة عالية" : "Confiance élevée",
+    medium: ar ? "ثقة متوسطة" : "Confiance moyenne",
+    low: ar ? "ثقة منخفضة" : "Confiance faible",
+  };
+  const levelLabel = levelLabels[data.level] || data.level;
+
+  let warningHtml = "";
+  if (data.level === "low") {
+    warningHtml = `<p style="color:var(--red);font-size:13px;margin-bottom:8px">
+      ⚠️ ${ar ? "الصورة غير واضحة أو الثقة منخفضة جداً — يرجى التقاط صورة أوضح وأقرب." : "Image peu claire ou confiance trop faible — essayez une photo plus nette et plus proche."}
+    </p>`;
+  } else if (data.level === "medium") {
+    warningHtml = `<p style="color:var(--orange);font-size:13px;margin-bottom:8px">
+      ⚠️ ${ar ? "هذا احتمال غير مؤكد — تحقق مع طبيب بيطري." : "Résultat incertain — vérifiez avec un vétérinaire."}
+    </p>`;
+  }
+
+  const disclaimer = ar
+    ? "هذا النتيجة للمساعدة فقط وليست تشخيصاً طبياً نهائياً. استشر طبيباً بيطرياً للتأكيد."
+    : "Ce résultat est une aide au repérage, pas un diagnostic définitif. Consultez un vétérinaire pour confirmation.";
+
+  const sortedProbs = Object.entries(data.probabilities).sort((a, b) => b[1] - a[1]);
+  const barColors = {
+    Healthy: "#2d6a4f",
+    Lumpy: "#c0392b",
+    Dermatophilosis: "#e67e22",
+    Pediculosis: "#8e44ad",
+    Ringworm: "#2980b9"
+  };
+
+  const barsHtml = sortedProbs.map(([cls, prob]) => {
+    const pct = Math.round(prob * 100);
+    const color = barColors[cls] || "#888";
+    return `<div class="skin-bar-row">
+      <span class="skin-bar-label">${cls}</span>
+      <div class="skin-bar-track"><div class="skin-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <span class="skin-bar-pct">${pct}%</span>
+    </div>`;
+  }).join("");
+
+  const icon = data.is_healthy ? "✅" : "🔬";
+  const headerText = ar
+    ? (data.is_healthy ? "الجلد يبدو سليماً" : "تم اكتشاف حالة جلدية محتملة")
+    : (data.is_healthy ? "Peau apparemment saine" : "Condition cutanée potentielle détectée");
+
+  const card = document.createElement("div");
+  card.className = "skin-card";
+  card.innerHTML = `
+    <p class="skin-header">${icon} ${headerText}</p>
+    <span class="skin-badge ${data.level}">${levelLabel} — ${confidencePct}%</span>
+    <p class="skin-class">${data.predicted_class}</p>
+    <p class="skin-desc">${data.description}</p>
+    ${warningHtml}
+    <div class="skin-bars">${barsHtml}</div>
+    <p class="skin-disclaimer">⚕️ ${disclaimer}</p>`;
+
+  row.appendChild(card);
+  addTTSControls(row, () => `${headerText}. ${data.predicted_class}. ${data.description}. ${disclaimer}`);
+  chatbox.appendChild(row);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+const AGENT_RENDERERS = {
+  vet: renderVetCard,
+  meteo: renderMeteoCard,
+  feed: renderFeedCard,
+  skin: renderSkinCard
+};
+
+imgBtn.onclick = () => fileInput.click();
+
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  pendingImage = file;
+  previewThumb.src = URL.createObjectURL(file);
+  previewName.textContent = file.name.length > 22 ? file.name.slice(0, 20) + "…" : file.name;
+  previewStrip.classList.add("visible");
+  imgBtn.classList.add("has-image");
+  input.placeholder = currentLang === "ar"
+    ? "أضف وصفاً اختيارياً للصورة…"
+    : "Ajoutez une description optionnelle…";
+
+  fileInput.value = "";
+};
+
+removeImgBtn.onclick = clearPendingImage;
+
+function clearPendingImage() {
+  pendingImage = null;
+  previewStrip.classList.remove("visible");
+  imgBtn.classList.remove("has-image");
+  previewThumb.src = "";
+  previewName.textContent = "";
+  input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+}
+
+async function sendMessage(customText = null) {
+  const text = customText || input.value.trim();
+  const image = pendingImage;
+
+  if (!text && !image) return;
+  if (!customText) input.value = "";
+  if (image) clearPendingImage();
+
+  addUserMessage(text, image);
+  addTyping();
+
+  try {
+    await refreshLocationIfNeeded();
+
+    if (image) {
+      const formData = new FormData();
+      formData.append("image", image);
+      formData.append("lang", currentLang);
+      if (text) formData.append("message", text);
+
+      const res = await fetch(SKIN_URL, { method: "POST", body: formData });
+      removeTyping();
+
+      if (!res.ok) {
+        try {
+          const err = await res.json();
+          addTextMessage(`❌ ${err.error?.message || "Erreur"}`);
+        } catch {
+          addTextMessage("❌ Erreur serveur");
+        }
+        return;
+      }
+
+      const body = await res.json();
+
+      if (body.type === "agent" && body.agent === "skin") {
+        renderSkinCard(body.data);
+      } else if (body.type === "text") {
+        addTextMessage(body.content);
+      } else {
+        addTextMessage(JSON.stringify(body));
+      }
+      return;
+    }
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        session_id: sessionId,
+        lang: currentLang,
+        lat: userLocation.lat,
+        lon: userLocation.lon,
+      }),
+    });
+
+    removeTyping();
+
+    if (!res.ok) {
+      try {
+        const err = await res.json();
+        addTextMessage(`❌ ${err.error?.message || "Erreur serveur"}`);
+      } catch {
+        addTextMessage("❌ Erreur serveur");
+      }
+      return;
+    }
+
+    const contentType = res.headers.get("Content-Type") || "";
+
+    if (contentType.includes("application/json")) {
+      const data = await res.json();
+
+      if (data.type === "agent" && AGENT_RENDERERS[data.agent]) {
+        AGENT_RENDERERS[data.agent](data.data);
+        return;
+      }
+
+      if (data.type === "text") {
+        addTextMessage(data.content || "");
+        return;
+      }
+
+      addTextMessage(JSON.stringify(data));
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    const { msg, playBtn } = addTextMessage("");
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      msg.textContent += decoder.decode(value, { stream: true });
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    playBtn.disabled = false;
+  } catch (err) {
+    console.error(err);
+    removeTyping();
+    addTextMessage("❌ Erreur réseau");
+  }
+}
+
+sendBtn.onclick = () => sendMessage();
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+let mediaRecorder, audioChunks = [], isRecording = false;
+
+micBtn.onclick = async () => {
+  if (!isRecording) {
+    let stream;
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+      });
+    } catch {
+      input.placeholder = currentLang === "ar"
+        ? "⚠️ لا يمكن الوصول إلى الميكروفون"
+        : "⚠️ Microphone inaccessible";
+      setTimeout(() => {
+        input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+      }, 3000);
+      return;
+    }
+
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = e => {
+      if (e.data?.size > 0) audioChunks.push(e.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+
+      const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+      const formData = new FormData();
+      formData.append("audio", blob, "audio.webm");
+      formData.append("lang", currentLang);
+
+      try {
+        const res = await fetch(STT_URL, { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.status === "incomprehensible" || !data.text?.trim()) {
+          input.placeholder = currentLang === "ar"
+            ? "⚠️ صوت غير مفهوم، حاول مجدداً..."
+            : "⚠️ Audio incompréhensible, réessayez...";
+          setTimeout(() => {
+            input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+          }, 2500);
+          return;
+        }
+
+        input.value = data.text;
+        sendMessage(data.text);
+      } catch (err) {
+        console.error(err);
+        input.placeholder = currentLang === "ar"
+          ? "⚠️ خطأ في تحويل الصوت إلى نص"
+          : "⚠️ Erreur STT";
+        setTimeout(() => {
+          input.placeholder = currentLang === "ar" ? "اكتب سؤالك..." : "Posez votre question…";
+        }, 2500);
+      }
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    micBtn.classList.add("recording");
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    micBtn.classList.remove("recording");
+  }
+};
+
+if ("geolocation" in navigator) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLocation.lat = pos.coords.latitude;
+      userLocation.lon = pos.coords.longitude;
+    },
+    () => {},
+    { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+  );
+}
+</script>
+</body>
+</html>

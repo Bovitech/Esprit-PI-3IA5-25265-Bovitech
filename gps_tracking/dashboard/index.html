@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HerdTrack — GPS Farm Dashboard</title>
+
+  <link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+<header>
+  <div>
+    <h1>HerdTrack — Cow Tracking</h1>
+    <p>Deep Learning trajectory prediction + farmer-defined GPS zones</p>
+  </div>
+</header>
+
+<main>
+  <section class="map-section">
+    <div id="map"></div>
+
+    <div class="map-toolbar" role="toolbar" aria-label="Dashboard panels">
+      <button type="button" id="btnFarmSetup" class="toolbar-btn">Farm setup</button>
+      <button type="button" id="btnDetails" class="toolbar-btn">Cow & herd</button>
+    </div>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+
+    <!-- Farm setup: off-canvas left, toggled by button -->
+    <div id="farmDrawer" class="drawer drawer--left" aria-hidden="true">
+      <div class="drawer__head">
+        <h3>Farm setup</h3>
+        <button type="button" id="closeFarmDrawer" class="drawer__close" aria-label="Close farm setup">×</button>
+      </div>
+      <div class="drawer__body map-tools">
+        <button type="button" id="useLocationBtn">Use my current location</button>
+        <button type="button" id="pickRefBtn">Set reference by clicking map</button>
+
+        <p class="hint">
+          Current reference:<br>
+          <span id="refDisplay">--</span>
+        </p>
+
+        <hr>
+
+        <label for="zoneType">Zone type</label>
+        <select id="zoneType">
+          <option value="authorized">Authorized zone</option>
+          <option value="feeding">Feeding area</option>
+          <option value="resting">Resting area</option>
+          <option value="restricted">Restricted area</option>
+        </select>
+
+        <button type="button" id="startDrawBtn">Start drawing zone</button>
+        <button type="button" id="saveZoneBtn">Save zone</button>
+        <button type="button" id="clearZonesBtn">Clear zones</button>
+
+        <p class="hint">
+          Click on the map to draw a zone. Minimum 3 points.
+        </p>
+      </div>
+    </div>
+
+    <!-- Cow / herd: off-canvas right, collapsible sections inside -->
+    <div id="detailsDrawer" class="drawer drawer--right" aria-hidden="true">
+      <div class="drawer__head">
+        <h3>Cow & herd</h3>
+        <button type="button" id="closeDetailsDrawer" class="drawer__close" aria-label="Close details">×</button>
+      </div>
+      <div class="drawer__body drawer-details">
+        <details class="detail-group" open>
+          <summary>Select cow &amp; details</summary>
+          <div class="detail-group__inner">
+            <label for="cowSelect"><strong>Select cow:</strong></label>
+            <select id="cowSelect"></select>
+
+            <h2>Cow Details</h2>
+            <p><strong>Tag:</strong> <span id="tagId">--</span></p>
+            <p><strong>Time:</strong> <span id="time">--</span></p>
+            <p><strong>GPS position:</strong> <span id="gpsPos">--</span></p>
+            <p><strong>Local position:</strong> <span id="realPos">--</span></p>
+            <p><strong>Predicted:</strong> <span id="predPos">--</span></p>
+            <p><strong>Error:</strong> <span id="error">--</span></p>
+            <p><strong>Status:</strong> <span id="status">--</span></p>
+            <p><strong>Zone risk:</strong> <span id="futureRisk">--</span></p>
+            <p><strong>Isolation risk:</strong> <span id="isolationRisk">--</span></p>
+          </div>
+        </details>
+
+        <details class="detail-group">
+          <summary>Herd summary</summary>
+          <div class="detail-group__inner">
+            <p><strong>Total cows:</strong> <span id="totalCows">--</span></p>
+            <p><strong>Inside zone:</strong> <span id="insideCount">--</span></p>
+            <p><strong>Outside zone:</strong> <span id="outsideCount">--</span></p>
+            <p><strong>Isolated:</strong> <span id="isolatedCount">--</span></p>
+            <p><strong>Herd status:</strong> <span id="herdStatus">--</span></p>
+          </div>
+        </details>
+
+        <details class="detail-group">
+          <summary>Model performance &amp; playback</summary>
+          <div class="detail-group__inner">
+            <p><strong>MAE:</strong> <span id="mae">--</span></p>
+            <p><strong>RMSE:</strong> <span id="rmse">--</span></p>
+            <input type="range" id="slider" min="0" value="0" />
+            <button type="button" id="playBtn">Play</button>
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div><span class="dot green"></span> Inside authorized zone</div>
+      <div><span class="dot red"></span> Outside authorized zone</div>
+      <div><span class="dot orange"></span> Isolated cow</div>
+      <div><span class="dot blue"></span> Predicted next position</div>
+    </div>
+  </section>
+</main>
+
+<script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
