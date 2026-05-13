@@ -1,7 +1,15 @@
 import React from 'react';
-import { StatusBar } from 'react-native';
+import {
+  ActivityIndicator,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import {
   useFonts,
@@ -17,7 +25,6 @@ import {
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 
-// SCREENS
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -26,7 +33,8 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { colors } from './src/theme/colors';
 import { initI18n } from './src/i18n';
 
-const Stack = createNativeStackNavigator();
+const Stack =
+  Platform.OS === 'web' ? createStackNavigator() : createNativeStackNavigator();
 
 export default function App() {
   const [ready, setReady] = React.useState(false);
@@ -57,26 +65,49 @@ export default function App() {
     };
   }, []);
 
-  if (!ready || !fontsLoaded) return null;
+  if (!ready || !fontsLoaded) {
+    return (
+      <View style={styles.boot}>
+        <ActivityIndicator size="large" color={colors.green} />
+        <Text style={styles.bootText}>Chargement BoviTech…</Text>
+      </View>
+    );
+  }
+
+  const stackScreenOptions =
+    Platform.OS === 'web'
+      ? { headerShown: false, cardStyle: { flex: 1 } }
+      : { headerShown: false };
 
   return (
-    <NavigationContainer>
-      <StatusBar backgroundColor={colors.green} barStyle="light-content" />
+    <View style={styles.root}>
+      <NavigationContainer>
+        <StatusBar backgroundColor={colors.green} barStyle="light-content" />
 
-      <Stack.Navigator
-        initialRouteName="Onboarding" // ✅ CHANGED
-        screenOptions={{ headerShown: false }}
-      >
-        {/* NEW */}
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-
-        {/* AUTH */}
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-
-        {/* APP */}
-        <Stack.Screen name="Home" component={AppNavigator} />
-      </Stack.Navigator>
-    </NavigationContainer>
+        <Stack.Navigator initialRouteName="Onboarding" screenOptions={stackScreenOptions}>
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="Home" component={AppNavigator} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  boot: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f4f6f9',
+  },
+  bootText: {
+    marginTop: 16,
+    fontSize: 15,
+    color: '#1A3C2E',
+  },
+});

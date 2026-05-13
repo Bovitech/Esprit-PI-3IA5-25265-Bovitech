@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
+import mimetypes
 import os
 import sys
 import threading
@@ -12,7 +13,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Optional
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 
 import joblib
 import numpy as np
@@ -23,6 +24,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent  # BOVITECH-V2-4/
 SRC_DIR = Path(__file__).resolve().parent
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from vocal_preprocess import audio_bytes_to_model_input, parse_class_labels_env
 from build_rl_state import build_state_vector
@@ -888,6 +891,63 @@ def _predict_illness_payload(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _herdtrack_dashboard_dir() -> Path:
+    raw = os.environ.get("HERDTRACK_DASHBOARD_DIR")
+    if raw:
+        return Path(raw).expanduser().resolve()
+    return (ROOT_DIR / "gps_tracking" / "dashboard").resolve()
+
+
+def _serve_herdtrack_dashboard(handler: BaseHTTPRequestHandler, path: str) -> bool:
+    """
+    Serve HerdTrack static files from Bovitech-GPS-style dashboard (index.html, app.js, JSON).
+    GET /gps/dashboard → redirect to /gps/dashboard/index.html
+    """
+    prefix = "/gps/dashboard"
+    if path != prefix and not path.startswith(prefix + "/"):
+        return False
+
+    if path in (prefix, prefix + "/"):
+        handler.send_response(HTTPStatus.FOUND)
+        handler.send_header("Location", prefix + "/index.html")
+        handler.send_header("Content-Length", "0")
+        handler.send_header("Access-Control-Allow-Origin", "*")
+        handler.end_headers()
+        return True
+
+    rel = unquote(path[len(prefix) + 1 :]).strip().replace("\\", "/")
+    if not rel or rel.endswith("/"):
+        rel = "index.html"
+    if ".." in rel.split("/"):
+        handler._write_json(HTTPStatus.FORBIDDEN, {"error": "Invalid path"})
+        return True
+
+    base = _herdtrack_dashboard_dir()
+    file_path = (base / rel).resolve()
+    try:
+        file_path.relative_to(base)
+    except ValueError:
+        handler._write_json(HTTPStatus.FORBIDDEN, {"error": "Invalid path"})
+        return True
+
+    if not file_path.is_file():
+        handler._write_json(HTTPStatus.NOT_FOUND, {"error": "Not found"})
+        return True
+
+    ctype, _ = mimetypes.guess_type(str(file_path))
+    if not ctype:
+        ctype = "application/octet-stream"
+
+    body = file_path.read_bytes()
+    handler.send_response(HTTPStatus.OK)
+    handler.send_header("Content-Type", ctype)
+    handler.send_header("Content-Length", str(len(body)))
+    handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.end_headers()
+    handler.wfile.write(body)
+    return True
+
+
 def _resolve_thi_for_stress(payload: dict[str, Any], barn: dict[str, Any]) -> float:
     thi = _safe_float(payload.get("thi"), float("nan"))
     if thi == thi:
@@ -920,6 +980,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         path = urlparse(self.path).path
+        if _serve_herdtrack_dashboard(self, path):
+            return
         if path == "/health":
             with BARN_LOCK:
                 barn = dict(BARN_LATEST)
