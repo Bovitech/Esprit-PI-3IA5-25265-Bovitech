@@ -83,6 +83,17 @@ python manage.py runserver
 
 See `.env.example`
 
+## Datasets
+
+Training data is **not in Git** — only needed to **retrain** models. To run the app, use pre-trained weights from `python scripts/download_models.py`.
+
+| Dataset | Kaggle link | Used for |
+|---------|-------------|----------|
+| **MMCows** | https://www.kaggle.com/datasets/hienvuvg/mmcows | Behavior, stress, milk, vocal, GPS, illness *(all models except skin disease)* |
+| **Cattle diseases** | https://www.kaggle.com/datasets/devang03mgr/cattle-diseases-datasets | Skin disease EfficientNet-B3 ([DiseaseClassification](https://huggingface.co/Amiiimi/DiseaseClassification)) |
+
+Download into `data/raw/` — see [data/README.md](data/README.md).
+
 ## Demo
 
 Video: https://sites.google.com/view/bovitechproject/demo?authuser=0 
