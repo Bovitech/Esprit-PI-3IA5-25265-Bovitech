@@ -73,7 +73,7 @@
 | Item | Status |
 |------|--------|
 | SQLite + Django migrations (`PI_Backend`) | ✅ |
-| Seed scripts / sample data | ⚠️ Manual: create superuser via `createsuperuser` |
+| Seed scripts / sample data | ✅ By design — **no seed DB**; users register via the app (`/api/auth/register/`) |
 | Documented in README | ✅ |
 
 ### 6. Documentation
