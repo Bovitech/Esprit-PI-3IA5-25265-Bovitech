@@ -20,7 +20,7 @@ jobs:
         run: python -m py_compile src/model_http_api.py
       - name: Download models script (dry manifest)
         run: |
-          test -f models.manifest.json
+          test -f scripts/models.manifest.json
           python scripts/download_models.py || true
 
   chatbot:
@@ -35,7 +35,7 @@ jobs:
           python-version: "3.11"
       - name: Install and test
         run: |
-          pip install -r requirements.txt
+          pip install -r ../requirements.txt
           python manage.py test chatbot --verbosity=1
 
   mobile-lint:
