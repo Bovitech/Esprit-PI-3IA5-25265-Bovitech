@@ -61,4 +61,18 @@ Preprocessing notes (repo scripts):
 
 **Inference vs training:** Kaggle data is **not required** to use the app. Pre-trained weights are fetched separately via `scripts/models.manifest.json`. You only need these datasets if you **retrain** models locally.
 
-More detail: [Datasets section in root README](../README.md#datasets).
+More detail: [root README](../README.md).
+
+---
+
+## Authors
+
+| Member | Class | Year |
+|--------|-------|------|
+| Salah Ghanoui | 3IA5 | 2025–2026 |
+| Melek Amimi | 3IA5 | 2025–2026 |
+| Meryem Benani | 3IA5 | 2025–2026 |
+| Zeineb Moujehed | 3IA5 | 2025–2026 |
+| Maram Ben Farhat | 3IA5 | 2025–2026 |
+
+**Supervisors:** Ms. Dorsaf Hrizi, Ms. Oumayma Guasmi
