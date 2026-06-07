@@ -17,7 +17,7 @@
 | Database readiness | ⚠️ Needs Attention |
 | Documentation (`docs/`) | ✅ Compliant |
 | Demo assets | ⚠️ Local run only (no screenshots/video by team choice) |
-| Docker | ➖ Not used (removed by team) |
+| Docker | ✅ Compliant (`docker/Dockerfile`, `docker/docker-compose.yml` — single service) |
 | CI/CD | ✅ Compliant |
 | AI / ML annex | ✅ Compliant |
 | IoT / Embedded | ✅ Compliant |
@@ -32,7 +32,7 @@
 |-------------|--------|
 | `README.md` | ✅ |
 | `.gitignore` | ✅ |
-| `.env.example` | ✅ (root, mobile, PI_Backend, chatbot) |
+| `.env.example` | ✅ (single file at repo root) |
 | `docs/` | ✅ |
 | `demo/` | ✅ |
 | `src/` | ✅ |
@@ -131,7 +131,7 @@
 
 ## Files created
 
-- `.env.example`, `main-bovitech-main/.env.example`, `PI_Backend/.env.example`, `bovitech-chatbot-main/backend/.env.example`
+- `.env.example` at repo root (ML API, Expo, PI_Backend, chatbot)
 - `docs/README.md`
 - `demo/README.md`, `demo/screenshots/.gitkeep`
 - `data/README.md`, `gps_tracking/uwb_data/README.md`
@@ -152,6 +152,6 @@
 1. **Rename on GitHub:** Settings → General → Repository name → `Esprit-PI-3IA5-25265-Bovitech`, then update remote:  
    `git remote set-url origin https://github.com/Bovitech/Esprit-PI-3IA5-25265-Bovitech.git`
 2. Add final model metrics to root README (and Hugging Face model cards).
-3. Run `PI_Backend`: `copy .env.example .env`, `migrate`, optional `createsuperuser`.
+3. Run `PI_Backend`: ensure repo root `.env` exists, `migrate`, optional `createsuperuser`.
 4. Purge secrets from Git history if they were previously committed (WiFi, old Django key).
 5. Confirm GitHub org visibility and ESPRIT publication form with your supervisor.

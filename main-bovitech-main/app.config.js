@@ -1,7 +1,7 @@
 const path = require('path');
 
-// Charge .env depuis la racine du projet Expo (bovitech-main/)
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+// Single repo-root .env (Bovitech/.env)
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const appJson = require('./app.json');
 

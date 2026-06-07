@@ -1,0 +1,18 @@
+# Single service — ML inference API only. Run from repo root:
+#   docker compose -f docker/docker-compose.yml up --build
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8008:8008"
+    env_file:
+      - path: ../.env
+        required: false
+    volumes:
+      - ../finale_model:/app/finale_model
+      - ../gps_tracking/models:/app/gps_tracking/models
+      - ../bovitech-chatbot-main/models:/app/bovitech-chatbot-main/models
+    restart: unless-stopped

@@ -1,6 +1,10 @@
-# Bovitech — install everything from repo root:
+# Bovitech — install from repo root (Python 3.10+ and Node.js 18+):
+#
 #   pip install -r requirements.txt
-# Python 3.10+ recommended.
+#   cd main-bovitech-main && npm install && cd ..
+#
+# pip → this file (ML API, PI_Backend, …)
+# npm → main-bovitech-main/package.json (Expo app)
 
 # --- ML inference API (src/model_http_api.py) ---
 pandas>=2.0.0,<3

@@ -16,11 +16,12 @@ import os
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+REPO_ROOT = BASE_DIR.parent
+load_dotenv(REPO_ROOT / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY required. Copy PI_Backend/.env.example to PI_Backend/.env")
+    raise RuntimeError("SECRET_KEY required. Copy .env.example to .env at the repo root.")
 
 DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")

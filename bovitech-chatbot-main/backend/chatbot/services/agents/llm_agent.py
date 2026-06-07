@@ -40,7 +40,7 @@ def stream(
         msg = (
             "تعذّر الاتصال بنموذج الذكاء: تحقق من مفتاح GROQ_API_KEY في ملف .env (console.groq.com)."
             if lang == "ar"
-            else "Impossible de générer la réponse : vérifiez GROQ_API_KEY dans backend/.env (clé valide sur https://console.groq.com/keys )."
+            else "Impossible de générer la réponse : vérifiez GROQ_API_KEY dans le .env à la racine du repo (clé valide sur https://console.groq.com/keys )."
         )
         yield msg
         return msg

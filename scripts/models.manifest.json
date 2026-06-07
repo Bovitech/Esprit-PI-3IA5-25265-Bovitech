@@ -1,5 +1,5 @@
 {
-  "_comment": "Models are NOT in Git. URLs here are fetched on first API start or via: python scripts/download_models.py",
+  "_comment": "Models are NOT in Git. Run once: python scripts/download_models.py",
   "artifacts": [
     {
       "dest": "finale_model/behavior_rf_multimodal.joblib",
@@ -29,15 +29,19 @@
     },
     {
       "dest": "gps_tracking/models/lstm_all.pth",
-      "url": "",
-      "optional": true,
-      "note": "Add URL for GPS LSTM; /gps/dashboard/ needs this"
+      "url": "https://huggingface.co/Amiiimi/GPS/resolve/main/lstm_all.pth",
+      "required": true
     },
     {
       "dest": "gps_tracking/models/scaler_all.pkl",
-      "url": "",
-      "optional": true,
-      "note": "Add URL for GPS scaler"
+      "url": "https://huggingface.co/Amiiimi/GPS/resolve/main/scaler_all.pkl",
+      "required": true
+    },
+    {
+      "dest": "bovitech-chatbot-main/models/best_model.pth",
+      "url": "https://huggingface.co/Amiiimi/DiseaseClassification/resolve/main/best_model.pth",
+      "required": true,
+      "note": "Skin disease EfficientNet-B3 — chatbot /chatbot/skin/"
     }
   ]
 }

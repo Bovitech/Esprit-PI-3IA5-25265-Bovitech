@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_MANIFEST = ROOT / "models.manifest.json"
+DEFAULT_MANIFEST = ROOT / "scripts" / "models.manifest.json"
 
 
 @dataclass

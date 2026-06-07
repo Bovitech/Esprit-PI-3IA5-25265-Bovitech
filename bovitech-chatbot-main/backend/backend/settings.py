@@ -2,9 +2,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-# backend/backend/settings.py → parent.parent is the folder that contains manage.py and .env
+# backend/backend/settings.py → parent.parent is the folder that contains manage.py
 _BACKEND_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(_BACKEND_ROOT / ".env")
+REPO_ROOT = _BACKEND_ROOT.parent.parent
+load_dotenv(REPO_ROOT / ".env")
 
 BASE_DIR = _BACKEND_ROOT.parent
 
@@ -109,12 +110,12 @@ _GROQ_PLACEHOLDERS = frozenset(
 GROQ_API_KEY = (os.getenv("GROQ_API_KEY") or "").strip()
 if not GROQ_API_KEY:
     raise RuntimeError(
-        "GROQ_API_KEY is required. Add it to backend/.env (create a key at "
+        "GROQ_API_KEY is required. Add it to the repo root .env (create a key at "
         "https://console.groq.com/keys - it must start with gsk_)."
     )
 if GROQ_API_KEY.lower() in _GROQ_PLACEHOLDERS or not GROQ_API_KEY.startswith("gsk_"):
     raise RuntimeError(
-        "GROQ_API_KEY in backend/.env is missing or not a real Groq key. "
+        "GROQ_API_KEY in the repo root .env is missing or not a real Groq key. "
         "Replace it with a key from https://console.groq.com/keys (starts with gsk_)."
     )
 
