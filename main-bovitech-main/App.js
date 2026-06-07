@@ -32,9 +32,40 @@ import AppNavigator from './src/navigation/AppNavigator';
 
 import { colors } from './src/theme/colors';
 import { initI18n } from './src/i18n';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
 
 const Stack =
   Platform.OS === 'web' ? createStackNavigator() : createNativeStackNavigator();
+
+function AppNavigation() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <View style={styles.boot}>
+        <ActivityIndicator size="large" color={colors.green} />
+        <Text style={styles.bootText}>Chargement BoviTech…</Text>
+      </View>
+    );
+  }
+
+  const stackScreenOptions =
+    Platform.OS === 'web'
+      ? { headerShown: false, cardStyle: { flex: 1 } }
+      : { headerShown: false };
+
+  return (
+    <Stack.Navigator
+      initialRouteName={isAuthenticated ? 'Home' : 'Onboarding'}
+      screenOptions={stackScreenOptions}
+    >
+      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="Home" component={AppNavigator} />
+    </Stack.Navigator>
+  );
+}
 
 export default function App() {
   const [ready, setReady] = React.useState(false);
@@ -74,24 +105,15 @@ export default function App() {
     );
   }
 
-  const stackScreenOptions =
-    Platform.OS === 'web'
-      ? { headerShown: false, cardStyle: { flex: 1 } }
-      : { headerShown: false };
-
   return (
-    <View style={styles.root}>
-      <NavigationContainer>
-        <StatusBar backgroundColor={colors.green} barStyle="light-content" />
-
-        <Stack.Navigator initialRouteName="Onboarding" screenOptions={stackScreenOptions}>
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="Home" component={AppNavigator} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </View>
+    <AuthProvider>
+      <View style={styles.root}>
+        <NavigationContainer>
+          <StatusBar backgroundColor={colors.green} barStyle="light-content" />
+          <AppNavigation />
+        </NavigationContainer>
+      </View>
+    </AuthProvider>
   );
 }
 

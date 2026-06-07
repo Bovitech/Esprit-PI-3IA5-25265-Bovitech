@@ -20,12 +20,19 @@ import numpy as np
 import pandas as pd
 
 
-ROOT_DIR = Path(__file__).resolve().parent.parent  # BOVITECH-V2-4/
+ROOT_DIR = Path(__file__).resolve().parent.parent
 SRC_DIR = Path(__file__).resolve().parent
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
+
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(ROOT_DIR / ".env")
+except ImportError:
+    pass
 
 from vocal_preprocess import audio_bytes_to_model_input, parse_class_labels_env
 from build_rl_state import build_state_vector
@@ -34,7 +41,7 @@ from illness.health_score import build_temporal_health_score
 MODEL_DIR = ROOT_DIR / "finale_model"
 DEFAULT_BEHAVIOR_MODEL = MODEL_DIR / "behavior_rf_multimodal.joblib"
 DEFAULT_MILK_MODEL = MODEL_DIR / "milk_xgb_pred_behavior_daily_milkhist_pipeline.joblib"
-DEFAULT_MILK_METRICS = Path(r"C:\sensor_data\model_outputs\milk_xgb_pred_behavior_daily_milkhist_metrics.json")
+DEFAULT_MILK_METRICS = MODEL_DIR / "milk_xgb_pred_behavior_daily_milkhist_metrics.json"
 DEFAULT_FAKE_IMU_CSV = ROOT_DIR / "T10_0725.csv"
 
 # Trained in stress_sensor; copy StressDetectionV3_trained.pt here or set STRESS_V3_CHECKPOINT
@@ -1173,6 +1180,28 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
+    skip = os.getenv("SKIP_MODEL_DOWNLOAD", "").strip().lower() in ("1", "true", "yes")
+    if not skip:
+        print("Checking ML artifacts (models.manifest.json)...")
+        try:
+            from model_download import ensure_models_for_api
+
+            if not ensure_models_for_api(quiet=False):
+                print(
+                    "ERROR: Required models missing. Fix models.manifest.json URLs or run:\n"
+                    "  python scripts/download_models.py",
+                    flush=True,
+                )
+                raise SystemExit(1)
+        except ImportError:
+            import subprocess
+
+            rc = subprocess.call([sys.executable, str(ROOT_DIR / "scripts" / "download_models.py"), "--required-only"])
+            if rc != 0:
+                raise SystemExit(rc)
+    else:
+        print("SKIP_MODEL_DOWNLOAD set — using existing files under finale_model/")
+
     host = "0.0.0.0"
     port = 8008
     server = ThreadingHTTPServer((host, port), RequestHandler)

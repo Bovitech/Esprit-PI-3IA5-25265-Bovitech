@@ -1,3 +1,9 @@
+:root {
+  --brand: #3d523b;
+  --brand-hover: #2f4130;
+  --brand-active: #283528;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -11,7 +17,7 @@ body {
 
 header {
   height: 72px;
-  background: #2c7be5;
+  background: var(--brand);
   color: white;
   padding: 12px 24px;
   display: flex;
@@ -69,7 +75,7 @@ main {
   padding: 10px 18px;
   border: none;
   border-radius: 10px;
-  background: #2c7be5;
+  background: var(--brand);
   color: white;
   font-weight: 700;
   font-size: 14px;
@@ -78,11 +84,11 @@ main {
 }
 
 .toolbar-btn:hover {
-  background: #1a5cb0;
+  background: var(--brand-hover);
 }
 
 .toolbar-btn.is-active {
-  background: #1557a0;
+  background: var(--brand-active);
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
@@ -199,14 +205,14 @@ main {
   padding: 10px;
   border: none;
   border-radius: 8px;
-  background: #2c7be5;
+  background: var(--brand);
   color: white;
   font-weight: bold;
   cursor: pointer;
 }
 
 .map-tools button:hover {
-  background: #1a5cb0;
+  background: var(--brand-hover);
 }
 
 select,
@@ -287,14 +293,14 @@ input[type="range"] {
   padding: 10px;
   border: none;
   border-radius: 8px;
-  background: #2c7be5;
+  background: var(--brand);
   color: white;
   font-weight: bold;
   cursor: pointer;
 }
 
 .drawer-details button#playBtn:hover {
-  background: #1a5cb0;
+  background: var(--brand-hover);
 }
 
 #slider {
@@ -335,7 +341,7 @@ input[type="range"] {
 }
 
 .blue {
-  background: #2c7be5;
+  background: var(--brand);
 }
 
 .cow-marker {
@@ -361,7 +367,7 @@ input[type="range"] {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #2c7be5;
+  background: var(--brand);
   border: 2px solid white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }

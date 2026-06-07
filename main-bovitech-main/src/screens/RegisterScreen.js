@@ -11,12 +11,18 @@ import {
   ScrollView,
   StatusBar,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 
 import { COLORS, RADIUS, SPACING, SHADOWS } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
+import { getAuthErrorMessage, showFormError } from '../utils/formErrors';
 
 export default function RegisterScreen({ navigation }) {
+  const { register } = useAuth();
   const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const [form, setForm] = useState({
     username: '',
@@ -52,11 +58,42 @@ export default function RegisterScreen({ navigation }) {
   };
 
   const handleNext = () => {
+    setError('');
+    if (!form.username.trim() || !form.email.trim() || !form.password) {
+      showFormError('Register', 'Fill in all fields.', setError);
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      showFormError('Register', 'Passwords do not match.', setError);
+      return;
+    }
     setStep(2);
   };
 
-  const handleRegister = () => {
-    navigation.replace('Home');
+  const handleRegister = async () => {
+    setError('');
+    if (!form.farmName.trim()) {
+      showFormError('Register', 'Enter your farm name.', setError);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await register({
+        username: form.username.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        farmName: form.farmName.trim(),
+        cowCount: form.cowCount,
+        region: form.region.trim(),
+      });
+      navigation.replace('Home');
+    } catch (err) {
+      const message = getAuthErrorMessage(err, 'Registration failed. Check PI_Backend.');
+      showFormError('Register', message, setError);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -128,11 +165,13 @@ export default function RegisterScreen({ navigation }) {
               </View>
             </View>
 
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
             {step === 1 && (
               <>
                 <TextInput
                   style={styles.input}
-                  placeholder="Nom d’utilisateur"
+                  placeholder="Nom d'utilisateur"
                   placeholderTextColor="rgba(255,255,255,0.65)"
                   value={form.username}
                   onChangeText={(v) => update('username', v)}
@@ -200,8 +239,16 @@ export default function RegisterScreen({ navigation }) {
                   onChangeText={(v) => update('region', v)}
                 />
 
-                <TouchableOpacity style={styles.primaryButton} onPress={handleRegister}>
-                  <Text style={styles.primaryButtonText}>Créer mon compte</Text>
+                <TouchableOpacity
+                  style={[styles.primaryButton, submitting && styles.primaryButtonDisabled]}
+                  onPress={handleRegister}
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <ActivityIndicator color="#1B4332" />
+                  ) : (
+                    <Text style={styles.primaryButtonText}>Créer mon compte</Text>
+                  )}
                 </TouchableOpacity>
               </>
             )}
@@ -351,6 +398,10 @@ const styles = StyleSheet.create({
     ...SHADOWS.strong,
   },
 
+  primaryButtonDisabled: {
+    opacity: 0.7,
+  },
+
   primaryButtonText: {
     color: '#1B4332',
     fontSize: 16,
@@ -372,5 +423,15 @@ const styles = StyleSheet.create({
     color: '#F2C94C',
     fontSize: 14,
     fontWeight: '800',
+  },
+
+  errorText: {
+    color: '#FFB4AB',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 14,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    padding: 12,
+    borderRadius: RADIUS.md,
   },
 });

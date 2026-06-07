@@ -77,13 +77,17 @@ Couleurs principales :
 
 ---
 
-## 🔧 Prochaines étapes (Backend)
+## Backend
 
-1. **API REST** : Node.js + Express ou FastAPI (Python)
-2. **Base de données** : PostgreSQL pour les données historiques
-3. **Temps réel** : Firebase Realtime DB ou WebSockets pour les alertes live
-4. **IoT** : MQTT broker pour recevoir les données des colliers
-5. **IA** : TensorFlow Lite pour les prédictions en local sur l'app
+The API is **not** in this folder. It runs from the repo root:
+
+**Backend:** Python — `../src/model_http_api.py` (port 8008)
+
+**Libraries:** PyTorch, TensorFlow, scikit-learn, XGBoost — inside `../src/`
+
+**Models used:** Random Forest · XGBoost · BiLSTM + Attention · CNN · PPO · LSTM · EfficientNet-B3
+
+Full setup: [../README.md](../README.md)
 
 ---
 

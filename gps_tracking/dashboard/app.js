@@ -234,17 +234,17 @@ function getFutureRisk(p) {
 function zoneColor(type) {
   if (type === "authorized") return "#00b894";
   if (type === "feeding") return "#27ae60";
-  if (type === "resting") return "#3498db";
+  if (type === "resting") return "#3d523b";
   if (type === "restricted") return "#e63757";
-  return "#2c7be5";
+  return "#3d523b";
 }
 
 function zoneFill(type) {
   if (type === "authorized") return "rgba(0,184,148,0.12)";
   if (type === "feeding") return "rgba(39,174,96,0.18)";
-  if (type === "resting") return "rgba(52,152,219,0.16)";
+  if (type === "resting") return "rgba(61,82,59,0.16)";
   if (type === "restricted") return "rgba(230,55,87,0.18)";
-  return "rgba(44,123,229,0.14)";
+  return "rgba(61,82,59,0.14)";
 }
 
 function zoneLabel(type) {
@@ -474,7 +474,7 @@ function updateTrajectoryLayers() {
       type: "line",
       source: "selectedTrajectory",
       paint: {
-        "line-color": "#2c7be5",
+        "line-color": "#3d523b",
         "line-width": 4
       }
     });
@@ -493,7 +493,7 @@ function updateTrajectoryLayers() {
       type: "line",
       source: "predictionLine",
       paint: {
-        "line-color": "#2c7be5",
+        "line-color": "#3d523b",
         "line-width": 2,
         "line-dasharray": [2, 2]
       }
@@ -572,6 +572,17 @@ function initMap() {
     style: "https://tiles.openfreemap.org/styles/liberty",
     center: [lonRef, latRef],
     zoom: 19
+  });
+
+  // Liberty style references POI icons not always present in the sprite sheet.
+  map.on("styleimagemissing", e => {
+    if (map.hasImage(e.id)) return;
+    const size = 1;
+    map.addImage(e.id, {
+      width: size,
+      height: size,
+      data: new Uint8Array(size * size * 4)
+    });
   });
 
   map.addControl(new maplibregl.NavigationControl());

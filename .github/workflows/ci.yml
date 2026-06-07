@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  python-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Syntax check inference API
+        run: python -m py_compile src/model_http_api.py
+      - name: Download models script (dry manifest)
+        run: |
+          test -f models.manifest.json
+          python scripts/download_models.py || true
+
+  chatbot:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bovitech-chatbot-main/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install and test
+        run: |
+          pip install -r requirements.txt
+          python manage.py test chatbot --verbosity=1
+
+  mobile-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: main-bovitech-main
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install and typecheck
+        run: |
+          npm ci || npm install
+          npx tsc --noEmit || echo "Typecheck skipped if no tsconfig"

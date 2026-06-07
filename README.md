@@ -1,266 +1,290 @@
-# Bovitech — Multimodal Smart Cattle Monitoring
+# Bovitech — Multimodal Cattle Monitoring
 
-**Bovitech** is a research-grade, multimodal decision-support stack for intelligent cattle monitoring. It combines **wearable IMU signals**, **barn environment**, **acoustics**, and **herd context** to support behavior understanding, stress awareness, production tracking, and early health signals. The system mixes classical ML, deep learning, and reinforcement learning depending on the modality.
-
-This project was developed as part of an academic program at **[ESPRIT School of Engineering](https://esprit.tn/)** (Tunisia).
-
----
-
-## Why this repository matters
-
-- **End-to-end scope**: from tabular sensor pipelines and trained artifacts to a **mobile operator UI** and a **lightweight HTTP inference service** usable on a farm PC or edge device.
-- **Multimodal by design**: behavior, milk, stress, vocalization, and fused “illness / early-warning” states are wired behind a single, documented API surface.
-- **Explainability where it counts**: the illness pathway integrates SHAP-style explanations so predictions are reviewable, not black-box alerts.
+**GitHub repository:** `Esprit-PI-3IA5-25265-Bovitech`  
+**Class:** 3IA5 · **Academic year:** 2025–2026  
+**Institution:** [ESPRIT School of Engineering](https://esprit.tn/)
 
 ---
 
-## Capabilities
+## Description
 
-| Area | What it does | Typical technique |
-|------|----------------|-------------------|
-| **Behavior** | Second-level activity classes from collar (and fused) sensor features | Random Forest (multimodal-ready pipeline) |
-| **Acoustics** | Bovine vocalization classification from recorded audio | CNN on Mel-spectrogram–like input (Keras `.h5`) |
-| **Stress** | Risk classes from THI, core body temperature, lying/rest proxies | PyTorch sequence model (`StressDetectionV3`) |
-| **Milk** | Daily yield estimate from behavior + history-style features | XGBoost + sklearn preprocessing pipeline |
-| **Health / early warning** | Three-way state: healthy, at-risk, ill — plus temporal health score | PPO (Stable-Baselines3) + SHAP explanations |
-| **Simulation / demo** | Tick-based simulation and barn sensor ingest for demos | Built into the inference server |
+**Bovitech** is a smart cattle monitoring platform developed as part of the PIDEV project at ESPRIT. It combines signals from IMU collars, barn environment (THI index), acoustics, and herd context to assess behavior, stress, milk production, vocalizations, and certain health indicators.
 
-Behavior classes supported in production mapping include: *Walking, Standing, Feeding (head up / down), Licking, Drinking, Lying* (see `BEHAVIOR_LABELS` in `src/model_http_api.py`).
+A **React Native (Expo)** mobile app lets farmers interact with the system. Inference is handled by a dedicated **Python ML API**. An optional **Django REST backend** (PI_Backend) manages authentication and farm data.
+
+> **Important:** trained model files are **not stored in this Git repository**. They are **downloaded separately** on first API startup (via `models.manifest.json` or `python scripts/download_models.py`).
 
 ---
 
-## High-level architecture
+## Objectives
 
-```mermaid
-flowchart LR
-  subgraph client["Operator devices"]
-    A["Expo / React Native app\n(main-bovitech-main)"]
-  end
-  subgraph inference["ML inference service"]
-    B["Python HTTP API\nsrc/model_http_api.py :8008"]
-  end
-  subgraph models["Trained artifacts"]
-    C["finale_model/\n.joblib / .pt / .h5 / SB3 zip"]
-  end
-  subgraph optional["Optional backends"]
-    D["PI_Backend\nDjango + DRF"]
-    E["bovitech-chatbot-main\nDjango + agents"]
-  end
-  A -->|REST JSON| B
-  B --> models
-  A -.->|optional| D
-  A -.->|optional| E
+- Monitor cattle health in real time.
+- Detect abnormal behavior.
+- Estimate animal stress levels.
+- Predict milk production.
+- Provide decision support for farmers.
+
+---
+
+## Technologies
+
+**Frontend:** React Native, Expo
+
+**Backend:** Python, Django REST Framework, ML inference API
+
+**Database:** SQLite
+
+**AI / ML:** PyTorch, TensorFlow, scikit-learn, XGBoost, Stable-Baselines3
+
+**Models:** Random Forest, XGBoost, BiLSTM, CNN, PPO, EfficientNet-B3
+
+**Embedded:** ESP32, DHT22
+
+Python 3.10+ · Node.js 18+
+
+---
+
+## Prerequisites
+
+- **Python 3.10+** and pip
+- **Git**
+- **Node.js 18+** (npm, for the mobile app)
+- **ffmpeg** *(optional, vocal analysis)*
+
+A single `pip install -r requirements.txt` installs all Python dependencies (ML API and PI_Backend).
+
+**Trained models** and **training datasets** are **not included** in the repository; only download scripts and manifests are versioned.
+
+---
+
+## Datasets
+
+Training data is **not versioned in Git**. It is only needed to **retrain** models, not to run the app (inference uses automatically downloaded weights).
+
+### Behavior dataset
+
+- **Source:** TBD
+- **Link:** TBD
+- **Preparation:** Multimodal IMU collar CSV files; cleaning, temporal alignment, feature extraction, and sliding windows. See the behavior training scripts.
+
+### Stress dataset
+
+- **Source:** TBD
+- **Link:** TBD
+- **Preparation:** Sensor sequences (THI, temperature, posture) per cow; sliding windows and shifted labels. See `stress_sensor/data_pipeline.py`.
+
+### Milk production dataset
+
+- **Source:** TBD
+- **Link:** TBD
+- **Preparation:** Daily milk history coupled with behavioral features; XGBoost pipeline with derived variables.
+
+### Vocalization dataset
+
+- **Source:** TBD
+- **Link:** TBD
+- **Preparation:** Bovine audio recordings; spectrogram / MFCC conversion, normalization, train/validation split.
+
+### Illness dataset (PPO)
+
+- **Source:** INRAE *(indicative)* — TBD
+- **Link:** TBD
+- **Preparation:** Temporal herd states, rewards per health class; RL training (Stable-Baselines3 PPO).
+
+### GPS / trajectory dataset
+
+- **Source:** UWB traces — TBD
+- **Link:** TBD
+- **Preparation:** Position time series; normalization (scaler) and LSTM sequences.
+
+### Skin dataset (chatbot)
+
+- **Source:** Bovine dermatology images — TBD
+- **Link:** TBD
+- **Preparation:** Resizing, augmentation, EfficientNet-B3 training (chatbot module).
+
+---
+
+## AI Models
+
+**Trained models are not stored in the Git repository** (size, licensing, ESPRIT best practices). On first ML API startup, required artifacts are **downloaded automatically** from URLs defined in `models.manifest.json`.
+
+Manual download:
+
+```bash
+python scripts/download_models.py
 ```
 
----
+Set `SKIP_MODEL_DOWNLOAD=1` in `.env` to skip auto-download if files are already cached locally.
 
-## Repository layout
-
-| Path | Role |
-|------|------|
-| `src/model_http_api.py` | **Main inference server** (stdlib `ThreadingHTTPServer`): `/health`, `/predict/*`, `/simulate/tick`, `/barn_sensor` |
-| `src/train_model.py`, `src/predict_behavior.py`, `src/pipeline_utils.py` | IMMU → per-second features → train / predict behavior |
-| `src/stress_v3_model.py`, `stress_sensor/` | Stress model training / evaluation tooling |
-| `src/vocal_preprocess.py` | Audio decoding (incl. ffmpeg), features for vocal CNN |
-| `src/build_rl_state.py`, `src/illness/` | Fused state vector + PPO policy + SHAP explainer + health score |
-| `src/dashboard_app.py` | Streamlit-style analytics entry point (when used) |
-| `finale_model/` | Checkpoints and pipelines expected at runtime (see below) |
-| `main-bovitech-main/` | **Bovitech mobile app** (Expo SDK ~54, React Native) |
-| `PI_Backend/` | Optional **Django** REST API (accounts, farms, cows) |
-| `bovitech-chatbot-main/` | Optional **Django** chatbot backend (e.g. vet / feed assistants) |
+| Model | Algorithm | Hugging Face | Kaggle | Google Drive |
+|-------|-----------|--------------|--------|--------------|
+| Behavior | Random Forest | [Amiiimi/Behaviour](https://huggingface.co/Amiiimi/Behaviour) | TBD | TBD |
+| Milk production | XGBoost | [Amiiimi/MilkProduction](https://huggingface.co/Amiiimi/MilkProduction) | TBD | TBD |
+| Stress | BiLSTM | [Amiiimi/StressModel](https://huggingface.co/Amiiimi/StressModel) | TBD | TBD |
+| Vocalization | CNN | [Amiiimi/AudioModel](https://huggingface.co/Amiiimi/AudioModel) | TBD | TBD |
+| Illness | PPO | TBD | TBD | TBD |
+| GPS / trajectory | LSTM | TBD | TBD | TBD |
+| Skin (chatbot) | EfficientNet-B3 | TBD | TBD | TBD |
 
 ---
 
-## Requirements
+## Model Performance
 
-### Inference + training (Python)
+| Model | Metric | Value |
+|-------|--------|-------|
+| Behavior | Accuracy | TBD |
+| Behavior | Macro F1 | TBD |
+| Stress | F1 Score | TBD |
+| Stress | ROC-AUC | TBD |
+| Milk production | RMSE | TBD |
+| Milk production | MAE | TBD |
+| Vocalization | Accuracy | TBD |
+| Illness (PPO) | Accuracy | TBD |
 
-- **Python** ≥ 3.9 (3.10+ recommended)
-- Core dependencies are listed in **`requirements.txt`**, including: `pandas`, `numpy`, `scikit-learn`, `joblib`, `torch`, `tensorflow>=2.15`, `librosa`, `soundfile`, `streamlit`, `plotly`, `stable-baselines3`, `gymnasium`.
+---
 
-**System packages (recommended):**
+## Hardware
 
-- **ffmpeg** — for robust audio decode in vocal classification (Windows: install ffmpeg and/or set `FFMPEG_PATH` to `ffmpeg.exe`).
-- **libsndfile** — usually pulled in via `soundfile` wheels; on minimal Linux images you may need the system library.
+| Component | Role |
+|-----------|------|
+| **ESP32** | IoT microcontroller, data collection and transmission |
+| **DHT22** | Temperature / humidity sensor (THI calculation) |
+| **Smart collar** | IMU and onboard sensors on cattle |
+| **Android / iOS smartphone** | Mobile client via Expo Go or native build |
 
-**Optional (illness explainability):**
+Full bill of materials (BOM), wiring diagrams, and supplier references: **[docs/liste-materiel.md](docs/liste-materiel.md)**
 
-- `shap` — required if you use the illness explainer paths (`src/illness/illness_xai.py`). Install with `pip install shap` if not already present in your environment.
+---
 
-### Mobile app
+## Schematics and Documentation
 
-- **Node.js** 18+
-- **npm** or **yarn**
-- **Expo CLI** (via `npx expo`)
+Additional documentation in the `docs/` folder:
 
-### Optional Django services
-
-- **`PI_Backend/requirements.txt`**: Django LTS 5.2+, Django REST framework, JWT, CORS.
-
-> **Note on naming:** this monorepo uses a **built-in Python HTTP server** for the ML API (not FastAPI). Optional Django apps cover persistence and chat. If you migrate to FastAPI or Supabase, treat that as a deployment choice — the current code paths are as documented above.
+```
+docs/
+├── schema-cablage.png    # ESP32 / DHT22 wiring diagram (to be added)
+├── api.md                # HTTP endpoint reference
+└── liste-materiel.md     # Hardware list (BOM)
+```
 
 ---
 
 ## Installation
 
 ```bash
-git clone https://github.com/Malek-ami/Bovitech
-cd bovitech
+git clone https://github.com/Bovitech/Esprit-PI-3IA5-25265-Bovitech.git
+cd Esprit-PI-3IA5-25265-Bovitech
 
 python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# Linux / macOS
-# source .venv/bin/activate
+# Windows: .venv\Scripts\activate
+# Linux / macOS: source .venv/bin/activate
 
 pip install -r requirements.txt
-# Optional: pip install shap
+
+copy .env.example .env
+cd main-bovitech-main && copy .env.example .env && cd ..
+cd PI_Backend && copy .env.example .env && cd ..
 ```
 
-### Model artifacts (`finale_model/`)
+On Linux / macOS, replace `copy` with `cp`.
 
-The server expects trained files under `finale_model/` (and paths can be overridden with environment variables). Examples referenced in code:
+Mobile app:
 
-- Behavior: `behavior_rf_multimodal.joblib`
-- Milk: `milk_xgb_pred_behavior_daily_milkhist_pipeline.joblib`
-- Stress: `StressDetectionV3_trained.pt` (or set `STRESS_V3_CHECKPOINT`)
-- Vocal: Keras `.h5` (default discovery under `finale_model/` or set `VOCAL_MODEL_PATH`)
-- Illness PPO: SB3-export zip (set `ILLNESS_PPO_PATH` if non-default)
+```bash
+cd main-bovitech-main
+npm install
+cd ..
+```
 
-If you clone without large binaries, obtain checkpoints from your team’s artifact store or retrain using the scripts under `src/` and `stress_sensor/`.
+Optional manual model download: `python scripts/download_models.py`
 
 ---
 
-## Running the stack
+## Launch
 
-### 1) ML inference API (required for on-device predictions)
+Use **multiple terminals**. Activate the Python venv (`.venv`) before any Python command.
 
-From repository root:
+**Terminal 1 — ML API (required)**
 
 ```bash
 python src/model_http_api.py
 ```
 
-Default bind: **`http://0.0.0.0:8008`**.
-
-Smoke test:
+→ **http://127.0.0.1:8008** · First startup: model download (2–10 min on CPU).
 
 ```bash
-curl http://localhost:8008/health
+curl http://127.0.0.1:8008/health
 ```
 
-### 2) Mobile app (`main-bovitech-main/`)
+**Terminal 2 — Mobile app (required)**
 
 ```bash
 cd main-bovitech-main
-npm install
-npx expo start
+npm run web
 ```
 
-**Point the app at your API** (see `main-bovitech-main/src/config/api.js`):
+→ **http://localhost:8081** · On phone: `npx expo start` (Expo Go).
 
-| Context | Default `API_BASE_URL` |
-|--------|-------------------------|
-| Android emulator | `http://10.0.2.2:8008` |
-| iOS simulator / web | `http://localhost:8008` |
-| Physical device | Set `EXPO_PUBLIC_API_BASE_URL` to `http://<your-pc-lan-ip>:8008` |
-
-Optional timeouts (ms) for slow CPU inference:
-
-- `EXPO_PUBLIC_API_HTTP_TIMEOUT_MS`
-- `EXPO_PUBLIC_API_VOCAL_TIMEOUT_MS`
-
-Optional chatbot backend URL:
-
-- `EXPO_PUBLIC_CHATBOT_BASE_URL` (defaults to port **8000** for the Django chatbot project)
-
-### 3) Optional: `PI_Backend` (Django)
+**Terminal 3 — PI_Backend Django (optional)**
 
 ```bash
 cd PI_Backend
-pip install -r requirements.txt
 python manage.py migrate
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-### 4) Optional: `bovitech-chatbot-main`
+→ **http://127.0.0.1:8000** · Admin: `/admin/` · Auth: `/api/auth/` · Cows: `/api/cows/`
 
-Follow that project’s `.env` / `SECRET_KEY` / `GROQ_API_KEY` setup in its `backend` app.
-
----
-
-## HTTP API surface (inference server)
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| `GET` | `/health` | Liveness and dependency check |
-| `POST` | `/predict/behavior` | Behavior class from sensor payload |
-| `POST` | `/predict/milk` | Milk yield prediction |
-| `POST` | `/predict/stress` | Stress classes (THI, CBT, lying / behavior context) |
-| `POST` | `/predict/vocal` | Vocal classification (`audio_wav_base64`) |
-| `POST` | `/predict/illness` | PPO + temporal health score + optional SHAP narrative |
-| `GET` | `/simulate/tick` | Demo / simulation tick |
-| `POST` | `/barn_sensor` | Ingest barn environment samples (temperature / humidity → THI) |
-
-Request/response shapes are defined by `RequestHandler` in `src/model_http_api.py` and mirrored in `main-bovitech-main/src/services/predictionApi.js`.
+| Service | Port |
+|---------|------|
+| ML API | 8008 |
+| PI_Backend | 8000 |
+| Expo (web) | 8081 |
 
 ---
 
-## Environment variables (selected)
+## Environment Variables
 
-| Variable | Purpose |
-|----------|---------|
-| `STRESS_V3_CHECKPOINT` | Override path to `StressDetectionV3` `.pt` |
-| `VOCAL_MODEL_PATH` | Override path to vocal `.h5` |
-| `VOCAL_SAMPLE_RATE`, `VOCAL_CLASS_ORDER`, `VOCAL_FFMPEG_TIMEOUT_SEC` | Vocal preprocessing / labeling order / decode timeout |
-| `FFMPEG_PATH` | Explicit path to `ffmpeg` on Windows or constrained PATH |
-| `ILLNESS_PPO_PATH` | Override path to illness PPO export |
+Copy each `.env.example` to `.env` (never commit `.env`). See those files for all variables (ML API, mobile app, PI_Backend, chatbot).
 
 ---
 
-## Training and batch workflows
+## Demo
 
-Behavior pipeline (IMMU → per-second dataset → RandomForest):
+**Local run:** start the ML API (`/health`), then the Expo app.
 
-```bash
-python src/build_dataset.py --sensor-root sensor_data/sensor_data --cow C01 --date 0725 --include-mag --output-csv artifacts/datasets/dataset_C01_0725.csv
-python src/train_model.py --sensor-root sensor_data/sensor_data --cows C01 C02 --dates 0725 --include-mag --out-dir artifacts/model
-python src/predict_behavior.py --immu-file path/to/T01_0725.csv --model-dir artifacts/model --output-csv artifacts/predictions/out.csv
-```
+**Demo video:** TBD
 
-> Raw datasets are **not** committed by default (see `.gitignore` for `sensor_data/`, `artifacts/`). Place data locally or wire your own storage.
+**Screenshots:**
 
-Illness / RL details: `src/illness/README.md`.
+- Home screen
+- Dashboard
+- Herd monitoring
+- Prediction analysis
 
----
-
-## Frontend & backend (summary)
-
-| Layer | Technology |
-|-------|------------|
-| **Mobile UX** | React Native, **Expo**, React Navigation, charts, maps, i18n |
-| **Inference** | Python 3, NumPy/Pandas/sklearn, PyTorch, TensorFlow/Keras, Stable-Baselines3 |
-| **Optional services** | Django + DRF (`PI_Backend`, `bovitech-chatbot-main`) |
+**Deployment:** TBD
 
 ---
 
-## Roadmap ideas
+## Authors
 
-- Hardening deployment: container images, health metrics, HTTPS reverse proxy.
-- Optional migration of `model_http_api.py` to **FastAPI** + OpenAPI for generated clients.
-- Centralized persistence (**PostgreSQL** / **Supabase**) for telemetry and audit trails.
-- On-device or edge **TFLite** paths for low-latency vocal and behavior models.
-
----
-
-## License
-
-Specify your license here (e.g. MIT, Apache-2.0, or academic / internal-only). If this is a school project, state restrictions from ESPRIT or your team’s policy.
+| Member | Class | Year |
+|--------|-------|------|
+| Salah Ghanoui | 3IA5 | 2025–2026 |
+| Melek Amimi | 3IA5 | 2025–2026 |
+| Meryem Benani | 3IA5 | 2025–2026 |
+| Zeineb Moujehed | 3IA5 | 2025–2026 |
+| Maram Ben Farhat | 3IA5 | 2025–2026 |
 
 ---
 
-## Citation / academic use
+## Supervision
 
-If you reuse this work academically, please cite the **ESPRIT** program and link this repository once public.
+- Ms. **Dorsaf Hrizi**
+- Ms. **Oumayma Guasmi**
+
+---
+
+License: [MIT](LICENSE)

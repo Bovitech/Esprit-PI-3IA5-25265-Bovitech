@@ -13,9 +13,9 @@
 #define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
-const char* WIFI_SSID = "Redmi 14C";
-const char* WIFI_PASS = "maram2711";
-const char* API_HOST = "192.168.28.189";
+const char* WIFI_SSID = "YOUR_WIFI_SSID";
+const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+const char* API_HOST = "192.168.0.100";
 const int API_PORT = 8008;
 
 void setup() {

@@ -36,7 +36,6 @@ def register_user(data):
 
 def login_user(email, password):
     try:
-        print(email, password)
         user = User.objects.get(email=email)
         user = authenticate(username=user.username, password=password)
         if not user:

@@ -225,3 +225,25 @@ BOVITECH-V2-4/
 T10_0725.csv
 node_modules/
 .vscode/
+.idea/
+
+# ML artifacts (host externally — scripts/download_models.py)
+*.pth
+*.pt
+*.h5
+*.pkl
+*.joblib
+*.onnx
+finale_model/*
+!finale_model/README.md
+gps_tracking/models/*
+!gps_tracking/models/README.md
+!gps_tracking/models/.gitkeep
+gps_tracking/uwb_data/
+bovitech-chatbot-main/models/
+bovitech-chatbot-main/backend/qdrant_data/
+
+# Python
+*.log
+.DS_Store
+Thumbs.db

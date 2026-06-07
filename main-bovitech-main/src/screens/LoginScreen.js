@@ -10,13 +10,19 @@ import {
   Platform,
   StatusBar,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 
 import { COLORS, RADIUS, SPACING, SHADOWS } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
+import { getAuthErrorMessage, showFormError } from '../utils/formErrors';
 
 export default function LoginScreen({ navigation }) {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const logoScale = useRef(new Animated.Value(0.85)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
@@ -37,8 +43,24 @@ export default function LoginScreen({ navigation }) {
     ]).start();
   }, []);
 
-  const handleLogin = () => {
-    navigation.replace('Home');
+  const handleLogin = async () => {
+    setError('');
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
+      showFormError('Login', 'Enter your email and password.', setError);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await login(trimmedEmail, password);
+      navigation.replace('Home');
+    } catch (err) {
+      const message = getAuthErrorMessage(err, 'Login failed. Check PI_Backend.');
+      showFormError('Login', message, setError);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -81,6 +103,8 @@ export default function LoginScreen({ navigation }) {
             Connectez-vous pour accéder au suivi de votre troupeau.
           </Text>
 
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
           <TextInput
             style={styles.input}
             placeholder="Adresse e-mail"
@@ -105,8 +129,16 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.forgotText}>Mot de passe oublié ?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-            <Text style={styles.primaryButtonText}>Se connecter</Text>
+          <TouchableOpacity
+            style={[styles.primaryButton, submitting && styles.primaryButtonDisabled]}
+            onPress={handleLogin}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <ActivityIndicator color="#1B4332" />
+            ) : (
+              <Text style={styles.primaryButtonText}>Se connecter</Text>
+            )}
           </TouchableOpacity>
 
           <View style={styles.bottomRow}>
@@ -223,6 +255,10 @@ const styles = StyleSheet.create({
     ...SHADOWS.strong,
   },
 
+  primaryButtonDisabled: {
+    opacity: 0.7,
+  },
+
   primaryButtonText: {
     color: '#1B4332',
     fontSize: 16,
@@ -244,5 +280,15 @@ const styles = StyleSheet.create({
     color: '#F2C94C',
     fontSize: 14,
     fontWeight: '800',
+  },
+
+  errorText: {
+    color: '#FFB4AB',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 14,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+    padding: 12,
+    borderRadius: RADIUS.md,
   },
 });

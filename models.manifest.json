@@ -1,0 +1,43 @@
+{
+  "_comment": "Models are NOT in Git. URLs here are fetched on first API start or via: python scripts/download_models.py",
+  "artifacts": [
+    {
+      "dest": "finale_model/behavior_rf_multimodal.joblib",
+      "url": "https://huggingface.co/Amiiimi/Behaviour/resolve/main/behavior_rf_multimodal.joblib",
+      "required": true
+    },
+    {
+      "dest": "finale_model/milk_xgb_pred_behavior_daily_milkhist_pipeline.joblib",
+      "url": "https://huggingface.co/Amiiimi/MilkProduction/resolve/main/milk_xgb_pred_behavior_daily_milkhist_pipeline.joblib",
+      "required": true
+    },
+    {
+      "dest": "finale_model/StressDetectionV3_trained.pt",
+      "url": "https://huggingface.co/Amiiimi/StressModel/resolve/main/StressDetectionV3_trained.pt",
+      "required": true
+    },
+    {
+      "dest": "finale_model/model_audio_classification (1).h5",
+      "url": "https://huggingface.co/Amiiimi/AudioModel/resolve/main/model_audio_classification%20(1).h5",
+      "required": true
+    },
+    {
+      "dest": "finale_model/illness_ppo.zip",
+      "url": "",
+      "optional": true,
+      "note": "Add Hugging Face URL when published; illness endpoints disabled until present"
+    },
+    {
+      "dest": "gps_tracking/models/lstm_all.pth",
+      "url": "",
+      "optional": true,
+      "note": "Add URL for GPS LSTM; /gps/dashboard/ needs this"
+    },
+    {
+      "dest": "gps_tracking/models/scaler_all.pkl",
+      "url": "",
+      "optional": true,
+      "note": "Add URL for GPS scaler"
+    }
+  ]
+}
