@@ -25,7 +25,7 @@ The SQLite database is created empty — users register through the app (no init
 - Python 3.10+
 - Node.js 18+
 - Git
-- Docker (recommended)
+- Docker 
 
 ## Installation
 
@@ -68,6 +68,7 @@ python src/model_http_api.py
 
 ```bash
 cd main-bovitech-main
+npm install
 npm run web
 ```
 

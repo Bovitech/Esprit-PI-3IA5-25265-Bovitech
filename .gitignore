@@ -227,21 +227,24 @@ node_modules/
 .vscode/
 .idea/
 
-# ML artifacts (host externally — scripts/download_models.py)
+# ML artifacts (host on Hugging Face — scripts/download_models.py)
 *.pth
 *.pt
 *.h5
 *.pkl
 *.joblib
 *.onnx
+*.zip
 finale_model/*
 !finale_model/README.md
 gps_tracking/models/*
 !gps_tracking/models/README.md
 !gps_tracking/models/.gitkeep
 gps_tracking/uwb_data/
-bovitech-chatbot-main/models/
+bovitech-chatbot-main/models/*
+!bovitech-chatbot-main/models/README.md
 bovitech-chatbot-main/backend/qdrant_data/
+stress_sensor/runs/
 
 # Python
 *.log
